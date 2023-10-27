@@ -8,8 +8,14 @@ RUN pip3 --disable-pip-version-check --no-cache-dir install -r /tmp/pip-tmp/requ
     && rm -rf /tmp/pip-tmp
 
 # [Optional] Uncomment this section to install additional OS packages.
-# RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
+RUN apt-get update && export DEBIAN_FRONTEND=noninteractive 
 #     && apt-get -y install --no-install-recommends <your-package-list-here>
 
+#RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+#    && dpkg -i google-chrome-stable_current_amd64.deb \
+#    && rm google-chrome-stable_current_amd64.deb
 
+RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \ 
+    && echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list
 
+RUN apt-get update && apt-get -y install google-chrome-stable
