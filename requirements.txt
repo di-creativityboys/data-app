@@ -6,3 +6,5 @@ selenium
 webdriver-manager
 twscrape
 asyncio
+httpx[brotli]
+brotli
