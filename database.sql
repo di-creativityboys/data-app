@@ -9,3 +9,16 @@ CREATE TABLE Persons (
     Address varchar(255),
     City varchar(255)
 );
+
+CREATE TABLE Articles (
+    URLId text,
+    Headline text,
+    Contents text,
+    Authors text,
+    UploadDate text,
+    ReadTime text,
+    ImageURL text,
+    ImageDescription text
+);
+
+DELETE FROM Articles;
