@@ -8,3 +8,4 @@ twscrape
 asyncio
 httpx[brotli]
 brotli
+ipynb
