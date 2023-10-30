@@ -20,5 +20,3 @@ CREATE TABLE Articles (
     ImageURL text,
     ImageDescription text
 );
-
-DELETE FROM Articles;
