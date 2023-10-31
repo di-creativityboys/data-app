@@ -3,7 +3,7 @@
 */
 
 CREATE TABLE Articles (
-    URLId text,
+    URLId text Constraint primary_key Primary Key,
     Headline text,
     Contents text,
     Authors text,
