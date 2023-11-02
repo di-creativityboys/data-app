@@ -17,7 +17,6 @@ CREATE TABLE IF NOT EXISTS Articles (
 -- Create Schema for tables of social media sources (Twitter, Instagram, etc.)
 CREATE SCHEMA IF NOT EXISTS social_media;
 
-
 -- Create Table for scraped Tweets
 CREATE TABLE IF NOT EXISTS social_media.Tweets (
     id bigint NOT NULL UNIQUE Constraint primary_key Primary Key,
@@ -27,16 +26,16 @@ CREATE TABLE IF NOT EXISTS social_media.Tweets (
     tweet_user text,
     lang text,
     rawContent text,
-    replyCount int,
-    retweetCount int,
-    likeCount int,
-    quoteCount int,
-    conversationId bigint,
+    replyCount numeric,
+    retweetCount numeric,
+    likeCount numeric,
+    quoteCount numeric,
+    conversationId text,
     hashtags text, -- list of hastags (interesting?)
     cashtags text,
     mentionedUsers text, -- list of users (interesting?)
     links text,
-    viewCount int,
+    viewCount numeric,
     retweetedTweet text,
     quotedTweet text,  -- ToDo: select id only??? tweet is probably not in our db anyways
     place text,
