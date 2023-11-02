@@ -10,9 +10,9 @@ CREATE TABLE IF NOT EXISTS Articles (
     UploadDate text,
     ReadTime text,
     ImageURL text,
-    ImageDescription text
+    ImageDescription text,
+    ScrapingTimeStamp text
 );
-
 
 -- Create Schema for tables of social media sources (Twitter, Instagram, etc.)
 CREATE SCHEMA IF NOT EXISTS social_media;
