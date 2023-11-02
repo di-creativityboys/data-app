@@ -9,3 +9,4 @@ asyncio
 httpx[brotli]
 brotli
 ipynb
+psycopg2
