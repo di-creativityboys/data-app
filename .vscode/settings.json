@@ -12,4 +12,6 @@
         }
     ],
     "sqltools.autoConnectTo": "container-postgres",
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.autoImportCompletions": true,
 }
