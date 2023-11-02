@@ -1,6 +1,6 @@
 /*markdown
-# Database setup for DevContainer
-*/
+ # Database setup for DevContainer
+ */
 
 CREATE TABLE IF NOT EXISTS Articles (
     URLId text Constraint primary_key Primary Key,
