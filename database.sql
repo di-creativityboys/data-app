@@ -10,5 +10,6 @@ CREATE TABLE Articles (
     UploadDate text,
     ReadTime text,
     ImageURL text,
-    ImageDescription text
+    ImageDescription text,
+    ScrapingTimeStamp text
 );
