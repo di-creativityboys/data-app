@@ -1,2 +1,14 @@
 numpy
 pandas
+beautifulsoup4
+requests
+selenium
+webdriver-manager
+twscrape
+asyncio
+httpx[brotli]
+brotli
+ipynb
+psycopg2
+flask
+flask[async]
