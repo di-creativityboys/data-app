@@ -10,3 +10,5 @@ httpx[brotli]
 brotli
 ipynb
 psycopg2
+flask
+flask[async]
