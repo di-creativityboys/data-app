@@ -1,9 +1,9 @@
 /*markdown
-# Database setup for DevContainer
-*/
+ # Database setup for DevContainer
+ */
 
 CREATE TABLE Articles (
-    URLId text,
+    URLId text PRIMARY KEY,
     Headline text,
     Contents text,
     Authors text,
