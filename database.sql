@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS Articles (
 
 -- Create Table for scraped Tweets
 CREATE TABLE IF NOT EXISTS Tweets (
-    id bigint NOT NULL UNIQUE PRIMARY KEY,
+    id bigint NOT NULL PRIMARY KEY,
     id_str text,
     tweet_url text,
     publish_date timestamp,
