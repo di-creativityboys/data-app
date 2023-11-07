@@ -22,7 +22,7 @@ async def scrape_and_load_db(user_name, limit):
     ## insert into database
     for index, row in df_tweets.iterrows():
         try:
-            cursor.execute('''INSERT INTO social_media.Tweets (
+            cursor.execute('''INSERT INTO Tweets (
                                 id,
                                 id_str,
                                 tweet_url,

@@ -1,12 +1,6 @@
-/*markdown
- # Database setup for DevContainer
- */
-
-
-
-
+-- Create table for scraped news articles
 CREATE TABLE IF NOT EXISTS Articles (
-    urlId varchar(200) Constraint primary_key Primary Key,
+    urlId varchar(200) NOT NULL PRIMARY KEY,
     headline varchar(200),
     contents text,
     authors varchar(200),
@@ -17,12 +11,9 @@ CREATE TABLE IF NOT EXISTS Articles (
     scrapingTimeStamp timestamp
 );
 
--- Create Schema for tables of social media sources (Twitter, Instagram, etc.)
-CREATE SCHEMA IF NOT EXISTS social_media;
-
 -- Create Table for scraped Tweets
-CREATE TABLE IF NOT EXISTS social_media.Tweets (
-    id bigint NOT NULL UNIQUE Constraint primary_key Primary Key,
+CREATE TABLE IF NOT EXISTS Tweets (
+    id bigint NOT NULL UNIQUE PRIMARY KEY,
     id_str text,
     tweet_url text,
     publish_date timestamp,
@@ -54,4 +45,4 @@ CREATE TABLE IF NOT EXISTS social_media.Tweets (
 
 -- Index on id for fast inserting or searching
 CREATE UNIQUE INDEX IF NOT EXISTS idx_tweet_id
-ON social_media.Tweets (id);
+ON Tweets (id);
