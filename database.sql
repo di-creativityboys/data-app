@@ -2,16 +2,19 @@
  # Database setup for DevContainer
  */
 
+
+
+
 CREATE TABLE IF NOT EXISTS Articles (
-    URLId text Constraint primary_key Primary Key,
-    Headline text,
-    Contents text,
-    Authors text,
-    UploadDate text,
-    ReadTime text,
-    ImageURL text,
-    ImageDescription text,
-    ScrapingTimeStamp text
+    urlId varchar(200) Constraint primary_key Primary Key,
+    headline varchar(200),
+    contents text,
+    authors varchar(200),
+    uploadDate date,
+    readTime int,
+    imageURL varchar(200),
+    imageDescription varchar(200),
+    scrapingTimeStamp timestamp
 );
 
 -- Create Schema for tables of social media sources (Twitter, Instagram, etc.)
