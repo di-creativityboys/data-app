@@ -1,14 +1,14 @@
 -- Create table for scraped news articles
 CREATE TABLE IF NOT EXISTS Articles (
-    urlId varchar(200) NOT NULL PRIMARY KEY,
-    headline varchar(200),
+    urlId text NOT NULL PRIMARY KEY,
+    headline text,
     contents text,
-    authors varchar(200),
-    uploadDate date,
+    authors text,
+    uploadDate text,
     readTime int,
-    imageURL varchar(200),
-    imageDescription varchar(200),
-    scrapingTimeStamp timestamp
+    imageURL text,
+    imageDescription text,
+    scrapingTimeStamp text
 );
 
 -- Create Table for scraped Tweets

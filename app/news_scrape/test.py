@@ -1,9 +1,13 @@
 import asyncio
 import psycopg2
 from bbc.bbc import get_bbc_news
+import os
+
+DB_PORT = os.environ.get("DATABASE_PORT", "5432")
+DB_HOST = os.environ.get("DATABASE_HOST", "localhost")
 
 def manual_db_init():
-    conn = psycopg2.connect(dbname="postgres", user="postgres", password="postgres", port="5432", host="localhost")
+    conn = psycopg2.connect(dbname="postgres", user="postgres", password="postgres", port=DB_PORT, host=DB_HOST)
     conn.autocommit = True
     cursor = conn.cursor()
 
