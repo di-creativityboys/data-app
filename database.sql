@@ -1,17 +1,14 @@
 -- Create table for scraped news articles
 CREATE TABLE IF NOT EXISTS Articles (
-    urlId text NOT NULL PRIMARY KEY,
+    urlId text PRIMARY KEY,
     headline text,
-    contents text,
-    authors text,
-    uploadDate text,
-    readTime int,
+    content text,
+    authors text[],
+    uploadDate timestamp,
     imageURL text,
     imageDescription text,
-    scrapingTimeStamp text
+    scrapingTimeStamp timestamp NOT NULL
 );
-
-DROP TABLE tweets;
 
 -- Create Table for scraped Tweets
 CREATE TABLE IF NOT EXISTS Tweets (
