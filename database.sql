@@ -35,5 +35,6 @@ CREATE TABLE IF NOT EXISTS Tweets (
     inReplyToUser varchar,
     photoLinks varchar[],
     videoLinks varchar[],
-    animatedLinks varchar[]
+    animatedLinks varchar[],
+    scrapingTimeStamp timestamp NOT NULL
 );
