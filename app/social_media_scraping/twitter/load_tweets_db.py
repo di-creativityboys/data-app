@@ -1,6 +1,10 @@
 from .scrape_twitter import *
 import pandas as pd
 import psycopg2
+import os
+
+DB_PORT = os.environ.get("DATABASE_PORT", "5432")
+DB_HOST = os.environ.get("DATABASE_HOST", "localhost")
 
 
 async def scrape_and_load_db(user_name, limit):
@@ -15,7 +19,7 @@ async def scrape_and_load_db(user_name, limit):
     df_tweets.rename(columns={'url': 'tweet_url', 'date': 'publish_date','user': 'tweet_user'}, inplace=True)
 
     ## create db connection
-    conn = psycopg2.connect(dbname="postgres",user="postgres", password="postgres", port="5432", host="localhost")
+    conn = psycopg2.connect(dbname="postgres",user="postgres", password="postgres", port=DB_PORT, host=DB_HOST)
     conn.autocommit = True
     cursor = conn.cursor()
 

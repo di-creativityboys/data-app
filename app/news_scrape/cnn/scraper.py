@@ -3,6 +3,10 @@ import requests
 from typing import List
 from datetime import datetime
 import psycopg2
+import os
+
+DB_PORT = os.environ.get("DATABASE_PORT", "5432")
+DB_HOST = os.environ.get("DATABASE_HOST", "localhost")
 
 MAINPAGE = "edition.cnn.com"
 HTTPS_SUFFIX = "https://"
@@ -140,7 +144,7 @@ articles = [create_article_from_link(link) for link in links.copy()]
 # Please work please work please work please work please work please work please work 
 article_dicts = [article.__dict__ for article in articles]
 
-conn = psycopg2.connect(dbname="postgres",user="postgres", password="postgres", port="5432", host="localhost")
+conn = psycopg2.connect(dbname="postgres",user="postgres", password="postgres", port=DB_PORT, host=DB_HOST)
 conn.autocommit = True
 cursor = conn.cursor()
 
