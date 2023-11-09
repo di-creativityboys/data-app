@@ -3,6 +3,7 @@ import requests
 from typing import List
 from datetime import datetime
 import psycopg2
+import pandas as pd
 
 MAINPAGE = "edition.cnn.com"
 HTTPS_SUFFIX = "https://"
@@ -17,7 +18,7 @@ class Image():
         return f'Photo description: {self.description}'
 
 class Article():
-    def __init__(self, headline : str, contents : str, authors : str, date : str, read_time : str, url : str, image : Image):
+    def __init__(self, headline : str, contents : str, authors : List[str], date : datetime, read_time : int, url : str, image : Image):
         self.headline = headline
         self.contents = contents
         self.authors = authors
@@ -34,7 +35,7 @@ class Article():
         string : str = ""
         return f"{self.headline}  by {self.authors}  {self.read_time}\n {self.contents} \n"
     
-def get_soup(url : str)-> BeautifulSoup:
+def get_soup(url : str)-> BeautifulSoup | None:
     article = requests.get(url).text
     if article:
         return BeautifulSoup(article)
@@ -57,7 +58,7 @@ def get_article_links(mainpage_soup : BeautifulSoup) -> list:
 def get_headline(article_soup : BeautifulSoup):
     return article_soup.find("h1").text
 
-def get_authors(article_soup : BeautifulSoup):
+def get_authors(article_soup : BeautifulSoup) -> List[str]:
     author_tags = article_soup.find_all(is_author)
     names = [tag.string for tag in author_tags]
     return names
@@ -137,16 +138,30 @@ links = get_article_links(mainpage_soup)
 articles = [create_article_from_link(link) for link in links.copy()]
 #delay scraping intensity to not get banned
 
-# Please work please work please work please work please work please work please work 
-article_dicts = [article.__dict__ for article in articles]
-
 conn = psycopg2.connect(dbname="postgres",user="postgres", password="postgres", port="5432", host="localhost")
 conn.autocommit = True
 cursor = conn.cursor()
 
+def filter_articles(articles : List[Article]) -> List[Article]:
+    new_articles = []
+    articles_already_present = pd.read_sql(sql="SELECT * FROM Articles", con=conn)
+    urls_of_old_articles = list(articles_already_present["urlid"])
+    count_of_old_articles = 0
+    for article in articles:
+        if article.url[8:] not in urls_of_old_articles:
+            new_articles.append(article)
+        else:
+            count_of_old_articles = count_of_old_articles + 1
+    print(f"Count of old articles: {count_of_old_articles}")
+    return new_articles
+
+new_articles = filter_articles(articles)
+
+article_dicts = [article.__dict__ for article in new_articles] # this dictionary only contains the articles that are not in the database already
+
 for article_dictionary in article_dicts:
     try:
-        cursor.execute('''INSERT INTO Articles(URLId, Headline, Contents, Authors, UploadDate, ReadTime, ImageURL, ImageDescription, ScrapingTimeStamp) 
+        cursor.execute('''INSERT INTO Articles(urlId, headline, contents, authors, uploadDate, readTime, imageURL, imageDescription, scrapingTimeStamp) 
                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);''', 
                        (article_dictionary["url"][8:], 
                        article_dictionary["headline"], 
