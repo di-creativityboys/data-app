@@ -6,8 +6,66 @@ import os
 DB_PORT = os.environ.get("DATABASE_PORT", "5432")
 DB_HOST = os.environ.get("DATABASE_HOST", "localhost")
 
+def insert_into_database (df_tweets: pd.DataFrame, cursor):
 
-async def scrape_and_load_db(user_name, limit):
+    df_tweets.rename(columns={'url': 'tweet_url', 'date': 'publish_date','user': 'tweet_user'}, inplace=True)
+    for index, row in df_tweets.iterrows():
+        try:
+            cursor.execute('''INSERT INTO Tweets (
+                                id,
+                                tweetUrl,
+                                publishDatetime,
+                                tweetUser,
+                                languageCode,
+                                rawContent,
+                                replyCount,
+                                retweetCount,
+                                likeCount,
+                                quoteCount,
+                                hashtags,
+                                cashtags,
+                                mentionedusers,
+                                linksInTweet,
+                                viewCount,
+                                reTweetedTweetId,
+                                quotedTweetId,
+                                inReplyToUser,
+                                photoLinks,
+                                videoLinks,
+                                animatedLinks,
+                                scrapingTimeStamp
+                            )
+                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s,%s, %s, %s, %s, %s, %s, %s, %s,%s, %s, %s, %s, %s, NOW());''', 
+                           (row.id,
+                            row.tweet_url,
+                            row.publish_date,
+                            str(row.tweet_user['username']),
+                            row.lang,
+                            row.rawContent,
+                            row.replyCount,
+                            row.retweetCount,
+                            row.likeCount,
+                            row.quoteCount,
+                            row.hashtags if str(row.hashtags) != '[]' else None,
+                            row.cashtags if str(row.cashtags) != '[]' else None,
+                            list(pd.DataFrame(row.mentionedUsers)['username']) if str(row.mentionedUsers) != '[]' else None,
+                            list(pd.DataFrame(row.links)['url']) if str(row.links) != '[]' else None,
+                            int(row.viewCount) if str(row.viewCount) != 'nan' else None,
+                            row.retweetedTweet['id'] if row.retweetedTweet != None else None,
+                            row.quotedTweet['id'] if row.quotedTweet != None else None,
+                            row.inReplyToUser['username'] if row.inReplyToUser != None else None,
+                            list(pd.DataFrame(row.media['photos'])['url']) if str(row.media['photos']) != '[]' else None, ## photoLinks
+                            [pd.DataFrame(row.media['videos'])['variants'][0][0]['url']] if str(row.media['videos']) != '[]' else None, ## videoLinks
+                            list(pd.DataFrame(row.media['animated'])['thumbnailUrl']) if str(row.media['animated']) != '[]' else None, ## animatedLinks
+                           )
+            )
+        except psycopg2.errors.UniqueViolation:
+            print('Tweet already in database. Tweet ID: ', row.id)
+        except BaseException as ex:
+            print('Differen Error: ', ex)
+
+
+async def scrape_twitter(user_name, limit):
     ##input username and amount of tweets requested
     ##user_name = input("Input the username: ")
     ##limit = int(input("Input the amount of tweets to get: "))
@@ -16,83 +74,19 @@ async def scrape_and_load_db(user_name, limit):
 
     ## prepare to load in db
     df_tweets = pd.DataFrame(result)
-    df_tweets.rename(columns={'url': 'tweet_url', 'date': 'publish_date','user': 'tweet_user'}, inplace=True)
 
     ## create db connection
     conn = psycopg2.connect(dbname="postgres",user="postgres", password="postgres", port=DB_PORT, host=DB_HOST)
     conn.autocommit = True
     cursor = conn.cursor()
 
-    ## insert into database
-    for index, row in df_tweets.iterrows():
-        try:
-            cursor.execute('''INSERT INTO Tweets (
-                                id,
-                                id_str,
-                                tweet_url,
-                                publish_date,
-                                tweet_user,
-                                lang,
-                                rawcontent,
-                                replycount,
-                                retweetcount,
-                                likecount,
-                                quotecount,
-                                conversationid,
-                                hashtags,
-                                cashtags,
-                                mentionedusers,
-                                links,
-                                viewcount,
-                                retweetedtweet,
-                                quotedtweet,
-                                place,
-                                coordinates,
-                                inreplytotweetid,
-                                inreplytouser,
-                                source,
-                                sourceurl,
-                                sourcelabel,
-                                media,
-                                _type
-                            )
-                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s,%s, %s, %s, %s, %s, %s, %s, %s,%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);''', 
-                           (row.id,
-                            row.id_str,
-                            row.tweet_url,
-                            row.publish_date,
-                            str(row.tweet_user),
-                            row.lang,
-                            row.rawContent,
-                            row.replyCount,
-                            row.retweetCount,
-                            row.likeCount,
-                            row.quoteCount,
-                            row.conversationId,
-                            str(row.hashtags),
-                            str(row.cashtags),
-                            str(row.mentionedUsers),
-                            str(row.links),
-                            row.viewCount,
-                            str(row.retweetedTweet),
-                            str(row.quotedTweet),
-                            str(row.place),
-                            str(row.coordinates),
-                            str(row.inReplyToTweetId),
-                            str(row.inReplyToUser),
-                            str(row.source),
-                            str(row.sourceUrl),
-                            str(row.sourceLabel),
-                            str(row.media),
-                            str(row._type)
-                           )
-            )
-        
-        except psycopg2.errors.UniqueViolation:
-            print('Tweet already in database. Tweet ID: ', row.id)
-        except BaseException as ex:
-            print('Differen Error: ', ex)
-
-
-## ToDo extract only username from tweet_user!!!!!
-## adjust attribute types for lists to sql array
+    ## insert tweets of user into database
+    insert_into_database(df_tweets, cursor)
+    ## insert retweeted tweets into database
+    df_retweetedTweets = df_tweets['retweetedTweet'].dropna().to_list()
+    df_retweeted = pd.DataFrame(df_retweetedTweets)
+    insert_into_database(df_retweeted, cursor)
+    ## insert quoted tweets into database
+    df_quotedTweets = df_tweets['quotedTweet'].dropna().to_list()
+    df_quoted = pd.DataFrame(df_quotedTweets)
+    insert_into_database(df_quoted, cursor)
