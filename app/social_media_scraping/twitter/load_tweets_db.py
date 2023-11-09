@@ -91,3 +91,4 @@ async def scrape_and_load_db(user_name, limit):
 
 
 ## ToDo extract only username from tweet_user!!!!!
+## adjust attribute types for lists to sql array

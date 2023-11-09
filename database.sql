@@ -11,36 +11,38 @@ CREATE TABLE IF NOT EXISTS Articles (
     scrapingTimeStamp timestamp
 );
 
+DROP TABLE tweets;
+
 -- Create Table for scraped Tweets
 CREATE TABLE IF NOT EXISTS Tweets (
     id bigint NOT NULL PRIMARY KEY,
-    id_str text,
-    tweet_url text,
+    id_str varchar,
+    tweet_url varchar,
     publish_date timestamp,
-    tweet_user text,
-    lang text,
-    rawContent text,
-    replyCount numeric,
-    retweetCount numeric,
-    likeCount numeric,
-    quoteCount numeric,
-    conversationId text,
-    hashtags text, -- list of hastags (interesting?)
-    cashtags text,
-    mentionedUsers text, -- list of users (interesting?)
-    links text,
-    viewCount numeric,
-    retweetedTweet text,
-    quotedTweet text,  -- ToDo: select id only??? tweet is probably not in our db anyways
-    place text,
-    coordinates text,
-    inReplyToTweetId text,
-    inReplyToUser text,
-    source text,
-    sourceUrl text,
-    sourceLabel text,
-    media text,
-    _type text
+    tweet_user varchar,
+    lang varchar,
+    rawContent varchar,
+    replyCount int,
+    retweetCount int,
+    likeCount int,
+    quoteCount int,
+    conversationId varchar,
+    hashtags varchar[], -- list of hastags (interesting?)
+    cashtags varchar[],
+    mentionedUsers varchar[], -- list of users (interesting?)
+    links varchar,
+    viewCount float,
+    retweetedTweet varchar,
+    quotedTweet varchar,  -- ToDo: select id only??? tweet is probably not in our db anyways
+    place varchar,
+    coordinates varchar,
+    inReplyToTweetId varchar,
+    inReplyToUser varchar,
+    source varchar,
+    sourceUrl varchar,
+    sourceLabel varchar,
+    media varchar,
+    _type varchar
 );
 
 -- Index on id for fast inserting or searching
