@@ -4,6 +4,10 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 import psycopg2
+import os
+
+DB_PORT = os.environ.get("DATABASE_PORT", "5432")
+DB_HOST = os.environ.get("DATABASE_HOST", "localhost")
 
 
 async def get_bbc_news():
@@ -105,6 +109,10 @@ async def get_bbc_news():
 
     get_all_authors()
 
+    import datetime;
+    current_time = datetime.datetime.now()
+    time_stamp = current_time.timestamp()
+
     # dictionary with all infos, ordered after attributes
     articles_info = {}
     for i in range(len(news_urls)):
@@ -113,11 +121,11 @@ async def get_bbc_news():
             "url": news_urls[i],
             "date": time[i],
             "authors": all_authors[i],
-            "read-time": "no info",
+            "read-time": 0, # no info
             "ImageURL": "not yet",
             "ImageDescription": "not yet",
             "contents": text_contents[i],
-            "scrapingTimeStamp": "not yet",
+            "scrapingTimeStamp": time_stamp,
         }
         articles_info[i] = article_info_i
 
@@ -125,8 +133,8 @@ async def get_bbc_news():
         dbname="postgres",
         user="postgres",
         password="postgres",
-        port="5432",
-        host="localhost",
+        port=DB_PORT,
+        host=DB_HOST,
     )
     conn.autocommit = True
     cursor = conn.cursor()
@@ -134,7 +142,7 @@ async def get_bbc_news():
     for article in articles_info.values():
         try:
             cursor.execute(
-                """INSERT INTO Articles(URLId, Headline, Contents, Authors, UploadDate, ReadTime, ImageURL, ImageDescription,scrapingTimeStamp) 
+                """INSERT INTO Articles(urlId, headline, contents, authors, uploadDate, readTime, imageURL, imageDescription, scrapingTimeStamp) 
                         VALUES (%s, %s, %s, %s, %s, %s, %s, %s,%s);""",
                 (
                     article["url"],
