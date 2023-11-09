@@ -12,36 +12,28 @@ CREATE TABLE IF NOT EXISTS Articles (
 
 -- Create Table for scraped Tweets
 CREATE TABLE IF NOT EXISTS Tweets (
-    id bigint NOT NULL PRIMARY KEY,
-    id_str varchar,
-    tweet_url varchar,
-    publish_date timestamp,
-    tweet_user varchar,
-    lang varchar,
-    rawContent varchar,
+    id bigint PRIMARY KEY,
+    tweetUrl varchar,
+    publishDatetime timestamp,
+    tweetUser varchar,
+    languageCode varchar,
+    rawContent text,
     replyCount int,
     retweetCount int,
     likeCount int,
     quoteCount int,
-    conversationId varchar,
     hashtags varchar[], -- list of hastags (interesting?)
-    cashtags varchar[],
+    cashtags varchar[], -- hashtag with $
     mentionedUsers varchar[], -- list of users (interesting?)
-    links varchar,
-    viewCount float,
-    retweetedTweet varchar,
-    quotedTweet varchar,  -- ToDo: select id only??? tweet is probably not in our db anyways
-    place varchar,
-    coordinates varchar,
-    inReplyToTweetId varchar,
+    linksInTweet varchar[],
+    viewCount int,
+    retweetedTweetId bigint,
+    quotedTweetId bigint,  -- ToDo: select id only??? tweet is probably not in our db anyways
+    -- place varchar,
+    -- coordinates varchar,
+    -- inReplyToTweetId varchar,
     inReplyToUser varchar,
-    source varchar,
-    sourceUrl varchar,
-    sourceLabel varchar,
-    media varchar,
-    _type varchar
+    photoLinks varchar[],
+    videoLinks varchar[],
+    animatedLinks varchar[]
 );
-
--- Index on id for fast inserting or searching
-CREATE UNIQUE INDEX IF NOT EXISTS idx_tweet_id
-ON Tweets (id);
