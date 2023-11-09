@@ -4,12 +4,11 @@ CREATE TABLE IF NOT EXISTS Articles (
     headline text,
     content text,
     authors text[],
-    uploadDate timestamp,
+    uploadTimestamp timestamp, -- should be called instead
     imageURL text,
     imageDescription text,
-    scrapingTimeStamp timestamp NOT NULL
+    scrapingTimestamp timestamp NOT NULL
 );
-
 -- Create Table for scraped Tweets
 CREATE TABLE IF NOT EXISTS Tweets (
     id bigint PRIMARY KEY,

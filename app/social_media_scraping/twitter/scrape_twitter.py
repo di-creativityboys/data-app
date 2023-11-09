@@ -6,9 +6,16 @@ from twscrape.logger import set_log_level
 async def gettweets(user_login, limit):
     api = API()  # or API("path-to.db") - default is `accounts.db`
     # ADD ACCOUNTS 
-    await api.pool.add_account("BingBong2397074", "BingBong", "twitterscrapertest@rambler.ua", "BingBong2397074")
-    await api.pool.add_account("BBong20237297", "BingBong", "twitterscrapertest@rambler.ua", "BingBong2397074")
-    await api.pool.add_account("bong220059128", "BingBong", "twitterscrapertest@rambler.ua", "BingBong2397074")
+    await api.pool.add_account("BingBong2397074", "BingBong", "", "")
+    await api.pool.add_account("BBong20237297", "BingBong", "", "")
+    await api.pool.add_account("bong220059128", "BingBong", "", "")
+    await api.pool.add_account("Bong2021Bi31407", "BingBong", "", "")
+    await api.pool.add_account("BBong20223868", "BingBong", "", "")
+    await api.pool.add_account("BBong202380929", "BingBong", "", "")
+    await api.pool.add_account("BBong202320783", "BingBong", "", "")
+    await api.pool.add_account("BBong202339368", "BingBong", "", "")
+    await api.pool.add_account("BBong202355016", "BingBong", "", "")
+    await api.pool.add_account("BBong202338320", "BingBong", "", "")
     await api.pool.login_all()
     await api.pool.relogin_failed()
     await api.pool.reset_locks()
