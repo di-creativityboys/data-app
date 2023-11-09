@@ -1,5 +1,6 @@
 import json
 import psycopg2
+import os
 from flask import Flask
 app = Flask(__name__)
 
@@ -12,7 +13,11 @@ async def index():
 
 @app.route('/myinit/')
 async def myinit():
-    conn = psycopg2.connect(dbname="postgres", user="postgres", password="postgres", port="5432", host="localhost")
+    DB_PORT = os.environ.get("DATABASE_PORT", "5432")
+    DB_HOST = os.environ.get("DATABASE_HOST", "localhost")
+
+
+    conn = psycopg2.connect(dbname="postgres", user="postgres", password="postgres", port=DB_PORT, host=DB_HOST)
     conn.autocommit = True
     cursor = conn.cursor()
 
