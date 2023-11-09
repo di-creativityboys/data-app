@@ -1,5 +1,5 @@
 -- Create table for scraped news articles
-CREATE TABLE IF NOT EXISTS Articles (
+CREATE TABLE IF NOT EXISTS Articles(
     urlId varchar(200) NOT NULL PRIMARY KEY,
     headline varchar(200),
     contents text,
@@ -10,7 +10,6 @@ CREATE TABLE IF NOT EXISTS Articles (
     imageDescription varchar(200),
     scrapingTimeStamp timestamp
 );
-
 -- Create Table for scraped Tweets
 CREATE TABLE IF NOT EXISTS Tweets (
     id bigint NOT NULL PRIMARY KEY,
@@ -25,13 +24,16 @@ CREATE TABLE IF NOT EXISTS Tweets (
     likeCount numeric,
     quoteCount numeric,
     conversationId text,
-    hashtags text, -- list of hastags (interesting?)
+    hashtags text,
+    -- list of hastags (interesting?)
     cashtags text,
-    mentionedUsers text, -- list of users (interesting?)
+    mentionedUsers text,
+    -- list of users (interesting?)
     links text,
     viewCount numeric,
     retweetedTweet text,
-    quotedTweet text,  -- ToDo: select id only??? tweet is probably not in our db anyways
+    quotedTweet text,
+    -- ToDo: select id only??? tweet is probably not in our db anyways
     place text,
     coordinates text,
     inReplyToTweetId text,
@@ -42,7 +44,5 @@ CREATE TABLE IF NOT EXISTS Tweets (
     media text,
     _type text
 );
-
 -- Index on id for fast inserting or searching
-CREATE UNIQUE INDEX IF NOT EXISTS idx_tweet_id
-ON Tweets (id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_tweet_id ON Tweets (id);
