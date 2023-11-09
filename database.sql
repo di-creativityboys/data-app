@@ -3,11 +3,11 @@ CREATE TABLE IF NOT EXISTS Articles (
     urlId text PRIMARY KEY,
     headline text,
     content text,
-    authors text [],
-    uploadDate timestamp,
+    authors text[],
+    uploadTimestamp timestamp, -- should be called instead
     imageURL text,
     imageDescription text,
-    scrapingTimeStamp timestamp NOT NULL
+    scrapingTimestamp timestamp NOT NULL
 );
 -- Create Table for scraped Tweets
 CREATE TABLE IF NOT EXISTS Tweets (
