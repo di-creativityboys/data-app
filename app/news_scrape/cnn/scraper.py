@@ -22,9 +22,9 @@ class Image():
         return f'Photo description: {self.description}'
 
 class Article():
-    def __init__(self, headline : str, contents : str, authors : List[str], date : datetime, read_time : int, url : str, image : Image):
+    def __init__(self, headline : str, content : str, authors : List[str], date : datetime, read_time : int, url : str, image : Image):
         self.headline = headline
-        self.contents = contents
+        self.content = content
         self.authors = authors
         self.date = date
         self.read_time = read_time
@@ -37,7 +37,7 @@ class Article():
     
     def __str__(self):
         string : str = ""
-        return f"{self.headline}  by {self.authors}  {self.read_time}\n {self.contents} \n"
+        return f"{self.headline}  by {self.authors}  {self.read_time}\n {self.content} \n"
     
 def get_soup(url : str)-> BeautifulSoup | None:
     article = requests.get(url).text
@@ -165,11 +165,11 @@ article_dicts = [article.__dict__ for article in new_articles] # this dictionary
 
 for article_dictionary in article_dicts:
     try:
-        cursor.execute('''INSERT INTO Articles(urlId, headline, contents, authors, uploadDate, readTime, imageURL, imageDescription, scrapingTimeStamp) 
+        cursor.execute('''INSERT INTO Articles(urlId, headline, content, authors, uploadDate, readTime, imageURL, imageDescription, scrapingTimeStamp) 
                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);''', 
                        (article_dictionary["url"][8:], 
                        article_dictionary["headline"], 
-                       article_dictionary["contents"], 
+                       article_dictionary["content"], 
                        article_dictionary["authors"], 
                        article_dictionary["date"], 
                        article_dictionary["read_time"], 
