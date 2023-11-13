@@ -11,7 +11,7 @@ async def gettweets(user_login, limit):
     await api.pool.add_account("bong220059128", "BingBong", "", "")
     await api.pool.add_account("Bong2021Bi31407", "BingBong", "", "")
     await api.pool.add_account("BBong20223868", "BingBong", "", "")
-    await api.pool.add_account("BBong202380929", "BingBong", "", "")
+    await api.pool.add_account("BBong202380929", "BingBong", "", "") # current dev acc 
     await api.pool.add_account("BBong202320783", "BingBong", "", "")
     await api.pool.add_account("BBong202339368", "BingBong", "", "")
     await api.pool.add_account("BBong202355016", "BingBong", "", "")
