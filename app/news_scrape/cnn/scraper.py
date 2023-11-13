@@ -1,18 +1,31 @@
-from bs4 import BeautifulSoup, Tag, NavigableString
+# %% [markdown]
+# ##### This part implements an entire workflow which scrapes the news articles.
+
+# %%
+# ToDos for 27.10.2002
+"""
+Get all articles from the mainpage
+
+From the articles, get everything you can get your hands on.
+
+Turn the article to dictionary form
+"""
+
+# %%
+from bs4 import BeautifulSoup, Tag
 import requests
 from typing import List
 from datetime import datetime
-import psycopg2
 import pandas as pd
-import os
+from sqlalchemy import create_engine
+from getpass import getpass
 
-DB_PORT = os.environ.get("DATABASE_PORT", "5432")
-DB_HOST = os.environ.get("DATABASE_HOST", "localhost")
-
+# %%
 MAINPAGE = "edition.cnn.com"
 HTTPS_SUFFIX = "https://"
 MAINPAGE_LINK = f"{HTTPS_SUFFIX}{MAINPAGE}"
 
+# %%
 class Image():
     def __init__(self, url : str, description : str):
         self.url = url
@@ -22,23 +35,25 @@ class Image():
         return f'Photo description: {self.description}'
 
 class Article():
-    def __init__(self, headline : str, content : str, authors : List[str], date : datetime, read_time : int, url : str, image : Image):
+    def __init__(self, headline : str, content : str, authors : List[str], upload_timestamp : pd.Timestamp, read_time : int, url : str, image : Image):
         self.headline = headline
         self.content = content
         self.authors = authors
-        self.date = date
+        self.upload_timestamp = upload_timestamp
         self.read_time = read_time
         self.url = url
-        self.image = image
+        self.imageUrl = image.url
+        self.description = image.description
 
 
-        self.timestamp = datetime.now()
+        self.scraping_timestamp = pd.to_datetime(datetime.now())
 
     
     def __str__(self):
         string : str = ""
         return f"{self.headline}  by {self.authors}  {self.read_time}\n {self.content} \n"
-    
+
+# %%
 def get_soup(url : str)-> BeautifulSoup | None:
     article = requests.get(url).text
     if article:
@@ -67,12 +82,21 @@ def get_authors(article_soup : BeautifulSoup) -> List[str]:
     names = [tag.string for tag in author_tags]
     return names
 
-def get_date(article_soup : BeautifulSoup):
+def get_date(article_soup : BeautifulSoup) -> pd.Timestamp:
     date_tag = article_soup.find(is_date)
     date_string = date_tag.text
-    date = extract_date_from_string(date_string)
-    return date
 
+    # the following code just extracts the datetime from the given date
+    splitted_date = date_string.split(",")
+    unstructured_time = splitted_date[0].split("\n") # the time is in the 3rd index, look down
+    time = unstructured_time[2].lstrip()
+    datetime_string_format = f"{time.split(' ')[0]} {time.split(' ')[1]},{splitted_date[-2]},{splitted_date[-1].rstrip()}"
+    print(datetime_string_format)
+    datetime_correct = pd.to_datetime(datetime_string_format)
+    
+    return datetime_correct
+
+# since the read time is not stored in the database, this line is obsolete
 def get_read_time(article_soup : BeautifulSoup):
     # a read time of 0 is used to signify an article whose reading time could not be fetched.
     read_time_tag = article_soup.find("div", attrs={"class" : ["headline__sub-description"]})  #[15:28] the slicing caused an error so I removed it for testing purposes
@@ -105,24 +129,13 @@ def extract_read_time_from_string(read_time_string : str) -> int:
     read_time = 0
     for character in read_time_string:
         try:
-            read_time =  int(character)
+            read_time = int(character)
         except:
             pass
     return read_time
 
-def extract_date_from_string(date_string : str):
-    # returns 0 if no date could be extracted
-    # python function to remove white spaces in front of word
-    # FIX
-    date = 0
-    for i in range(0, len(date_string)+1):
-        for j in range(i, len(date_string)+1):
-            try:
-                date = datetime.strptime(date_string[i:j], "%B %d, %Y")
-                break
-            except:
-                pass
-    return date
+def extract_upload_time(upload_time_string : str)-> datetime:
+    print(upload_time_string)
 
 def create_article_from_link(link : str) ->Article:
     article_soup = get_soup(link)
@@ -136,20 +149,13 @@ def create_article_from_link(link : str) ->Article:
 
     return Article(headline, content, author, date, read_time, url, image)
 
-mainpage_soup = get_soup(MAINPAGE_LINK)
-links = get_article_links(mainpage_soup)
-
-articles = [create_article_from_link(link) for link in links.copy()]
-#delay scraping intensity to not get banned
-
-conn = psycopg2.connect(dbname="postgres",user="postgres", password="postgres", port=DB_PORT, host=DB_HOST)
-conn.autocommit = True
-cursor = conn.cursor()
-
-def filter_articles(articles : List[Article]) -> List[Article]:
+# %%
+def filter_articles(articles : List[Article], engine) -> List[Article]:
     new_articles = []
-    articles_already_present = pd.read_sql(sql="SELECT * FROM Articles", con=conn)
+    articles_already_present = pd.read_sql_table("articles", con=engine)
+    #  print(articles_already_present.info()) # logging
     urls_of_old_articles = list(articles_already_present["urlid"])
+    # print(urls_of_old_articles) # logging
     count_of_old_articles = 0
     for article in articles:
         if article.url[8:] not in urls_of_old_articles:
@@ -157,37 +163,59 @@ def filter_articles(articles : List[Article]) -> List[Article]:
         else:
             count_of_old_articles = count_of_old_articles + 1
     print(f"Count of old articles: {count_of_old_articles}")
+
     return new_articles
 
-new_articles = filter_articles(articles)
+def scrape_from_cnn():
+    mainpage_soup = get_soup(MAINPAGE_LINK)
+    links = get_article_links(mainpage_soup)
+    articles = []
+    for link in links:
+        try:
+            article = create_article_from_link(link)
+            articles.append(article)
+        except Exception as e:
+            print(f"Following error: {str(e)}")
+    
+    PASSWORD = getpass()
+    engine = create_engine(f'postgresql://postgres:{PASSWORD}@localhost:5432/postgres')
+    
+    new_articles = filter_articles(articles, engine) # filtered against existing articles in database
+    article_dicts = [article.__dict__ for article in new_articles] # this dictionary only contains the articles that are not in the database already
 
-article_dicts = [article.__dict__ for article in new_articles] # this dictionary only contains the articles that are not in the database already
+    #this dataframe contains the data to be inserted to the articles table
 
-for article_dictionary in article_dicts:
-    try:
-        cursor.execute('''INSERT INTO Articles(urlId, headline, content, authors, uploadDate, readTime, imageURL, imageDescription, scrapingTimeStamp) 
-                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s);''', 
-                       (article_dictionary["url"][8:], 
-                       article_dictionary["headline"], 
-                       article_dictionary["content"], 
-                       article_dictionary["authors"], 
-                       article_dictionary["date"], 
-                       article_dictionary["read_time"], 
-                       article_dictionary["image"].url[8:], 
-                       article_dictionary["image"].description, 
-                       article_dictionary["timestamp"])
-                       )
-        
-    except Exception as ex:
-        print("Duplicate detected, skipping to next article." + str(ex))
+    articles_dataframe = pd.DataFrame(article_dicts)
+    #change the name of url to urlid
+    articles_dataframe["urlid"] = articles_dataframe["url"]
+    articles_dataframe = articles_dataframe.drop(columns=["url"])
 
-'''
-Notes: The urls are saved without the https:// prefix, seeing as I got an error while doing so.
-All textual datatypes have been saved as text, so that has to be done better in the future. Best solution is to convert
-the attributes.
-The execute statement does not check whether a record is present in the table or not.
-The solution I can think of now is to export the data of the database into a json format.
-After that, each time the program is started, the URLIDs are extracted and compared against
-the news that are scraped and the articles found in both are removed from the scraped articles.
-This ensures that the articles added to the database are the new ones.
-'''
+
+    # change the name of description to image description
+    articles_dataframe["imagedescription"] = articles_dataframe["description"]
+    articles_dataframe = articles_dataframe.drop(columns=["description"])
+
+    #change the name of upload_timestamp to uploadtimestamp
+    articles_dataframe["uploadtimestamp"] = articles_dataframe["upload_timestamp"]
+    articles_dataframe = articles_dataframe.drop(columns=["upload_timestamp"])
+
+    #change the name of upload_timestamp to uploadtimestamp
+    articles_dataframe["scrapingtimestamp"] = articles_dataframe["scraping_timestamp"]
+    articles_dataframe = articles_dataframe.drop(columns=["scraping_timestamp"])
+
+    # fix imageurl, for some reason this column is not recognized correctly
+    articles_dataframe["imageurl"] = articles_dataframe["imageUrl"]
+    articles_dataframe = articles_dataframe.drop(columns=["imageUrl"])
+
+
+    # drop the read_time column
+    articles_dataframe = articles_dataframe.drop(columns=["read_time"])
+    #filtered the duplicates out
+    print(articles_dataframe.shape)
+    new_articles_dataframe = articles_dataframe.drop_duplicates(subset=["urlid"], keep="first", inplace=True)
+
+    print(articles_dataframe.shape)
+
+    articles_dataframe.to_sql(name = "articles", con=engine, if_exists="append", index=False)
+
+scrape_from_cnn()
