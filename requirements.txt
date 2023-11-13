@@ -12,3 +12,5 @@ ipynb
 psycopg2
 flask
 flask[async]
+requests-oauthlib
+tweepy
