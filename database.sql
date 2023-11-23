@@ -7,7 +7,9 @@ CREATE TABLE IF NOT EXISTS Articles (
     uploadTimestamp timestamp, -- should be called instead
     imageURL text,
     imageDescription text,
-    scrapingTimestamp timestamp NOT NULL
+    scrapingTimestamp timestamp NOT NULL,
+    source text,
+    topic text
 );
 -- Create Table for scraped Tweets
 CREATE TABLE IF NOT EXISTS Tweets (
