@@ -18,7 +18,12 @@ from typing import List
 from datetime import datetime
 import pandas as pd
 from sqlalchemy import create_engine
-from getpass import getpass
+import os
+#from getpass import getpass
+
+DB_PASSWORD = "postgres"
+DB_PORT = os.environ.get("DATABASE_PORT", "5432")
+DB_HOST = os.environ.get("DATABASE_HOST", "localhost")
 
 # %%
 MAINPAGE = "edition.cnn.com"
@@ -166,7 +171,7 @@ def filter_articles(articles : List[Article], engine) -> List[Article]:
 
     return new_articles
 
-def scrape_from_cnn():
+async def scrape_from_cnn():
     mainpage_soup = get_soup(MAINPAGE_LINK)
     links = get_article_links(mainpage_soup)
     articles = []
@@ -177,8 +182,7 @@ def scrape_from_cnn():
         except Exception as e:
             print(f"Following error: {str(e)}")
     
-    PASSWORD = getpass()
-    engine = create_engine(f'postgresql://postgres:{PASSWORD}@localhost:5432/postgres')
+    engine = create_engine(f'postgresql://postgres:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/postgres')
     
     new_articles = filter_articles(articles, engine) # filtered against existing articles in database
     article_dicts = [article.__dict__ for article in new_articles] # this dictionary only contains the articles that are not in the database already
@@ -218,4 +222,4 @@ def scrape_from_cnn():
 
     articles_dataframe.to_sql(name = "articles", con=engine, if_exists="append", index=False)
 
-scrape_from_cnn()
+# scrape_from_cnn()
