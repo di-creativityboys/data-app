@@ -5,6 +5,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 import psycopg2
 import os
+from datetime import datetime
+import pytz
 
 DB_PORT = os.environ.get("DATABASE_PORT", "5432")
 DB_HOST = os.environ.get("DATABASE_HOST", "localhost")
@@ -24,7 +26,8 @@ async def get_bbc_news():
     news_urls = []
 
     def get_urls():
-        elements_for_url = driver.find_elements(By.CLASS_NAME, "gs-c-promo-heading")
+        elements_for_url = driver.find_elements(
+            By.CLASS_NAME, "gs-c-promo-heading")
         for element in elements_for_url:
             news_urls.append(element.get_attribute("href"))
 
@@ -48,7 +51,8 @@ async def get_bbc_news():
             headers.append(header.text)
         except:
             try:
-                header = driver.find_element(By.CLASS_NAME, "qa-story-headline")
+                header = driver.find_element(
+                    By.CLASS_NAME, "qa-story-headline")
                 headers.append(header.text)
             except:
                 try:
@@ -71,10 +75,26 @@ async def get_bbc_news():
             time.append(date)
             print("no date")
 
+    def get_Image(imageURL, ImageDesc):
+        try:
+            image_element = driver.find_element(By.TAG_NAME, 'img')
+            url = (image_element.get_attribute('src'))
+            desc = (image_element.get_attribute('alt'))
+            imageURL.append(url)
+            ImageDesc.append(desc)
+        except:
+            url = None
+            desc = None
+            imageURL.append(url)
+            ImageDesc.append(desc)
+    print('no image')
+
     # main method to extract all contents except the authors(might follow later). Runs way faster than the different smaller methods before
     text_contents = []
     time = []
     headers = []
+    imageURL = []
+    imageDesc = []
 
     def extract_all():
         for i in range(len(news_urls)):
@@ -94,7 +114,7 @@ async def get_bbc_news():
         lines = article.split("\n")
         for line in lines[:13]:  # Loop through lines from lines[0] to lines[10]
             if "By" in line:
-                authors.append(line)
+                authors.append(line.replace('By', ''))
         return authors
 
     all_authors = []
@@ -109,25 +129,23 @@ async def get_bbc_news():
 
     get_all_authors()
 
-    import datetime;
-    current_time = datetime.datetime.now()
-    time_stamp = current_time.timestamp()
+    germany_timezone = pytz.timezone("Europe/Berlin")
 
-    # dictionary with all infos, ordered after attributes
     articles_info = {}
     for i in range(len(news_urls)):
         article_info_i = {
             "headline": headers[i],
             "url": news_urls[i],
             "date": time[i],
-            "authors": all_authors[i],
-            "read-time": 0, # no info
-            "ImageURL": "not yet",
-            "ImageDescription": "not yet",
-            "contents": text_contents[i],
-            "scrapingTimeStamp": time_stamp,
+            "authors": [all_authors[i]],
+            "ImageURL": imageURL[i],
+            "ImageDescription": imageDesc[i],
+            "scrapingTimeStamp": (datetime.now(germany_timezone).isoformat()).split(".")[0],
+            "contents": text_contents[i]
         }
         articles_info[i] = article_info_i
+    print(articles_info[20])
+# URLId, Headline, Contents, Authors, UploadDate, ReadTime, ImageURL, ImageDescription
 
     conn = psycopg2.connect(
         dbname="postgres",
@@ -141,23 +159,12 @@ async def get_bbc_news():
 
     for article in articles_info.values():
         try:
-            cursor.execute(
-                """INSERT INTO Articles(urlId, headline, contents, authors, uploadDate, readTime, imageURL, imageDescription, scrapingTimeStamp) 
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s,%s);""",
-                (
-                    article["url"],
-                    article["headline"],
-                    article["contents"],
-                    article["authors"],
-                    article["date"],
-                    article["read-time"],
-                    article["ImageURL"],
-                    article["ImageDescription"],
-                    article["scrapingTimeStamp"]
-                )
-            )
+            cursor.execute('''INSERT INTO Articles(URLId, Headline, Content, Authors, UploadTimestamp, ImageURL, ImageDescription,scrapingTimeStamp) 
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s);''',
+                           (article["url"], article["headline"], article["contents"], article["authors"], article["date"],
+                            article["ImageURL"], article["ImageDescription"], article["scrapingTimeStamp"])
+                           )
         except psycopg2.IntegrityError as e:
             if "duplicate key value violates unique constraint" in str(e):
                 print(
-                    f"Article with URLId {article['url']} already exists in the database."
-                )
+                    f"Article with URLId {article['url']} already exists in the database.")

@@ -1,5 +1,5 @@
 import asyncio
-from twitter.load_tweets_db import scrape_and_load_db
+from twitter.load_tweets_db import scrape_twitter
 
 async def main():
     await scrape_twitter('barackobama',10)
