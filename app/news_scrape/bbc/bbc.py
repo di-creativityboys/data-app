@@ -150,6 +150,7 @@ async def get_bbc_news():
             extract_contents(text_contents)
             get_timestamps(time)
             get_headers(headers)
+            get_Image(imageURL, imageDesc)
             topic_result = get_topic(news_urls[i])
             topic.append(topic_result)
 
@@ -158,6 +159,8 @@ async def get_bbc_news():
                 time[i] = "unknown"
 
     extract_all()
+
+   
 
     def get_authors(article):
         authors = []
