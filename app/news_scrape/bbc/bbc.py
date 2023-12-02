@@ -19,7 +19,8 @@ async def get_bbc_news():
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
     driver = webdriver.Chrome(
-        service=Service(ChromeDriverManager().install()), options=options
+        service=Service(ChromeDriverManager().install()),
+        options=options
     )
 
     driver.get("https://www.bbc.com/news")
@@ -35,48 +36,47 @@ async def get_bbc_news():
     get_urls()
 
     def remove_numbers(category):
-    # Find the position of the first digit in the category
-     digit_index = next((index for index, char in enumerate(category) if char.isdigit()), None)
+        # Find the position of the first digit in the category
+        digit_index = next(
+            (index for index, char in enumerate(category) if char.isdigit()), None)
 
     # Remove everything after the first digit
-     category_without_number = category[:digit_index] if digit_index is not None else category
+        category_without_number = category[:
+                                           digit_index] if digit_index is not None else category
 
     # Remove trailing hyphen
-     if category_without_number.endswith('-'):
-        category_without_number = category_without_number[:-1]
+        if category_without_number.endswith('-'):
+            category_without_number = category_without_number[:-1]
 
-     return category_without_number
+        return category_without_number
 
     def get_topic(url):
-     try:
-      parsed_url = urlparse(url)
-      path_segments = parsed_url.path.split('/')
+        try:
+            parsed_url = urlparse(url)
+            path_segments = parsed_url.path.split('/')
 
 # Find the segment after "news"
-      category_segment_index = path_segments.index("news") + 1
-      category = path_segments[category_segment_index]
+            category_segment_index = path_segments.index("news") + 1
+            category = path_segments[category_segment_index]
 
-      category_without_number = remove_numbers(category)
+            category_without_number = remove_numbers(category)
 
-      return category_without_number
-     except:
+            return category_without_number
+        except:
 
-      try:
-       parsed_url = urlparse(url)
-       path_segments = parsed_url.path.split('/')
-       category_segment_index = path_segments.index("sport") + 1
-       category = path_segments[category_segment_index]
+            try:
+                parsed_url = urlparse(url)
+                path_segments = parsed_url.path.split('/')
+                category_segment_index = path_segments.index("sport") + 1
+                category = path_segments[category_segment_index]
 
+                category_without_number = remove_numbers(category)
 
-       category_without_number = remove_numbers(category)
+                return category_without_number
 
-       return category_without_number
- 
-      except:
-   
-       return "no info"
+            except:
 
-
+                return "no info"
 
     def extract_contents(text_contents):
         try:
@@ -140,7 +140,7 @@ async def get_bbc_news():
     headers = []
     imageURL = []
     imageDesc = []
-    topic=[]
+    topic = []
 
     def extract_all():
         for i in range(len(news_urls)):
@@ -194,8 +194,8 @@ async def get_bbc_news():
             "ImageURL": imageURL[i],
             "ImageDescription": imageDesc[i],
             "scrapingTimeStamp": (datetime.now(germany_timezone).isoformat()).split(".")[0],
-            "source":"bbc",
-            "topics":topic[i],
+            "source": "bbc",
+            "topics": topic[i],
             "contents": text_contents[i]
         }
         articles_info[i] = article_info_i
@@ -217,7 +217,7 @@ async def get_bbc_news():
             cursor.execute('''INSERT INTO Articles(URLId, Headline, Content, Authors, UploadTimestamp, ImageURL, ImageDescription,scrapingTimeStamp, source, topic) 
                         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s,%s);''',
                            (article["url"], article["headline"], article["contents"], article["authors"], article["date"],
-                            article["ImageURL"], article["ImageDescription"], article["scrapingTimeStamp"], article["source"],article["topics"])
+                            article["ImageURL"], article["ImageDescription"], article["scrapingTimeStamp"], article["source"], article["topics"])
                            )
         except psycopg2.IntegrityError as e:
             if "duplicate key value violates unique constraint" in str(e):

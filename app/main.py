@@ -4,10 +4,9 @@ import os
 from flask import Flask
 app = Flask(__name__)
 
-from .news_scrape.bbc.bbc import get_bbc_news
-from .news_scrape.cnn.scraper import scrape_from_cnn
-
-from .social_media_scraping.twitter.load_tweets_db import scrape_twitter
+from news_scrape.bbc import bbc
+from news_scrape.cnn import scraper as cnn
+from social_media_scraping.twitter import load_tweets_db as twitter
 
 @app.route('/')
 async def index():
@@ -31,14 +30,14 @@ async def myinit():
     return json.dumps({'status': 'ok'})
 
 @app.route('/bbc/')
-async def bbc():
-    await get_bbc_news()
+async def bbc_handler():
+    await bbc.get_bbc_news()
 
     return json.dumps({'status': 'started bbc scraping'})
 
 @app.route('/cnn/')
-async def cnn():
-    await scrape_from_cnn()
+async def cnn_handler():
+    await cnn.scrape_from_cnn()
 
     return json.dumps({'status': 'started cnn scraping'})
 
@@ -46,7 +45,7 @@ async def cnn():
 @app.route('/twitter/<name>')
 async def scrape_twitter_api(name):
     print(f"Twitter scraping: {name}")
-    await scrape_twitter(name, 100)
+    await twitter.scrape_twitter(name, 100)
 
     return json.dumps({'status': 'started twitter scraping'})
 
