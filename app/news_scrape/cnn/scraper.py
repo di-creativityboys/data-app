@@ -222,4 +222,4 @@ async def scrape_from_cnn():
 
     articles_dataframe.to_sql(name = "articles", con=engine, if_exists="append", index=False)
 
-# scrape_from_cnn()
+
