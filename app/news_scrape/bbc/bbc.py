@@ -111,14 +111,14 @@ async def get_bbc_news():
                     print("no header")
 
     def get_timestamps(time):
-        try:
-            time_element = driver.find_element(By.TAG_NAME, "time")
-            date = time_element.get_attribute("datetime")
-            time.append(date)
-        except:
-            date = "unknown"
-            time.append(date)
-            print("no date")
+     try:
+       time_element=driver.find_element(By.TAG_NAME, 'time')
+       date=(time_element.get_attribute('datetime'))
+       time.append(date.split(".")[0])#ignore the error, it works when it´s accessed by the main function
+     except:
+       date=None
+       time.append(date)
+       print('no date')
 
     def get_Image(imageURL, ImageDesc):
         try:
@@ -154,9 +154,6 @@ async def get_bbc_news():
             topic_result = get_topic(news_urls[i])
             topic.append(topic_result)
 
-        for i in range(len(time)):
-            if time[i] == None:
-                time[i] = "unknown"
 
     extract_all()
 

@@ -192,7 +192,7 @@ for link in links:
 # ##### This is where I try to connect to the postgres database and execute the insert statements
 
 # %%
-%pip install sqlalchemy
+#pip install sqlalchemy
 
 # %%
 import pandas as pd
