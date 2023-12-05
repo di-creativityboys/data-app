@@ -19,16 +19,35 @@ from datetime import datetime
 import pandas as pd
 from sqlalchemy import create_engine
 import os
-#from getpass import getpass
 
 DB_PASSWORD = "postgres"
 DB_PORT = os.environ.get("DATABASE_PORT", "5432")
 DB_HOST = os.environ.get("DATABASE_HOST", "localhost")
 
+
 # %%
 MAINPAGE = "edition.cnn.com"
 HTTPS_SUFFIX = "https://"
 MAINPAGE_LINK = f"{HTTPS_SUFFIX}{MAINPAGE}"
+
+# %%
+# added using Google Colab - R.H 04.12
+def get_keywords(link : str) -> List[str]:
+  split_link = link.split("/")
+  split_link.remove('https:')
+  split_link.remove('')
+  split_link.remove('edition.cnn.com')
+  split_link.remove("index.html")
+
+
+  keywords = []
+  for part in split_link:
+    if  "-" in part:
+      keywords = keywords + part.split("-")
+      split_link.remove(part)
+
+  keywords = keywords + split_link
+  return keywords
 
 # %%
 class Image():
@@ -49,11 +68,13 @@ class Article():
         self.url = url
         self.imageUrl = image.url
         self.description = image.description
+        self.source = 'CNN'
+        self.topic = get_keywords(url) # added using Google Colab - R.H 04.12
 
 
         self.scraping_timestamp = pd.to_datetime(datetime.now())
 
-    
+
     def __str__(self):
         string : str = ""
         return f"{self.headline}  by {self.authors}  {self.read_time}\n {self.content} \n"
@@ -98,7 +119,7 @@ def get_date(article_soup : BeautifulSoup) -> pd.Timestamp:
     datetime_string_format = f"{time.split(' ')[0]} {time.split(' ')[1]},{splitted_date[-2]},{splitted_date[-1].rstrip()}"
     print(datetime_string_format)
     datetime_correct = pd.to_datetime(datetime_string_format)
-    
+
     return datetime_correct
 
 # since the read time is not stored in the database, this line is obsolete
@@ -155,7 +176,36 @@ def create_article_from_link(link : str) ->Article:
     return Article(headline, content, author, date, read_time, url, image)
 
 # %%
-def filter_articles(articles : List[Article], engine) -> List[Article]:
+mainpage_soup = get_soup(MAINPAGE_LINK)
+links = get_article_links(mainpage_soup)
+
+# %%
+articles = []
+for link in links:
+    try:
+        article = create_article_from_link(link)
+        articles.append(article)
+    except Exception as e:
+        print(f"Following error: {str(e)}")
+
+# %% [markdown]
+# ##### This is where I try to connect to the postgres database and execute the insert statements
+
+# %%
+%pip install sqlalchemy
+
+# %%
+import pandas as pd
+from sqlalchemy import create_engine
+from getpass import getpass
+
+PASSWORD = getpass()
+
+
+engine = create_engine(f'postgresql://postgres:{PASSWORD}@localhost:5432/postgres')
+
+# %%
+def filter_articles(articles : List[Article]) -> List[Article]:
     new_articles = []
     articles_already_present = pd.read_sql_table("articles", con=engine)
     #  print(articles_already_present.info()) # logging
@@ -171,55 +221,51 @@ def filter_articles(articles : List[Article], engine) -> List[Article]:
 
     return new_articles
 
-async def scrape_from_cnn():
-    mainpage_soup = get_soup(MAINPAGE_LINK)
-    links = get_article_links(mainpage_soup)
-    articles = []
-    for link in links:
-        try:
-            article = create_article_from_link(link)
-            articles.append(article)
-        except Exception as e:
-            print(f"Following error: {str(e)}")
-    
-    engine = create_engine(f'postgresql://postgres:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/postgres')
-    
-    new_articles = filter_articles(articles, engine) # filtered against existing articles in database
-    article_dicts = [article.__dict__ for article in new_articles] # this dictionary only contains the articles that are not in the database already
+new_articles = filter_articles(articles) # filtered against existing articles in database
 
-    #this dataframe contains the data to be inserted to the articles table
+# %%
+article_dicts = [article.__dict__ for article in new_articles] # this dictionary only contains the articles that are not in the database already
 
-    articles_dataframe = pd.DataFrame(article_dicts)
-    #change the name of url to urlid
-    articles_dataframe["urlid"] = articles_dataframe["url"]
-    articles_dataframe = articles_dataframe.drop(columns=["url"])
+# %%
+#this dataframe contains the data to be inserted to the articles table
+
+articles_dataframe = pd.DataFrame(article_dicts)
+#change the name of url to urlid
+articles_dataframe["urlid"] = articles_dataframe["url"]
+articles_dataframe = articles_dataframe.drop(columns=["url"])
 
 
-    # change the name of description to image description
-    articles_dataframe["imagedescription"] = articles_dataframe["description"]
-    articles_dataframe = articles_dataframe.drop(columns=["description"])
+# change the name of description to image description
+articles_dataframe["imagedescription"] = articles_dataframe["description"]
+articles_dataframe = articles_dataframe.drop(columns=["description"])
 
-    #change the name of upload_timestamp to uploadtimestamp
-    articles_dataframe["uploadtimestamp"] = articles_dataframe["upload_timestamp"]
-    articles_dataframe = articles_dataframe.drop(columns=["upload_timestamp"])
+#change the name of upload_timestamp to uploadtimestamp
+articles_dataframe["uploadtimestamp"] = articles_dataframe["upload_timestamp"]
+articles_dataframe = articles_dataframe.drop(columns=["upload_timestamp"])
 
-    #change the name of upload_timestamp to uploadtimestamp
-    articles_dataframe["scrapingtimestamp"] = articles_dataframe["scraping_timestamp"]
-    articles_dataframe = articles_dataframe.drop(columns=["scraping_timestamp"])
+#change the name of upload_timestamp to uploadtimestamp
+articles_dataframe["scrapingtimestamp"] = articles_dataframe["scraping_timestamp"]
+articles_dataframe = articles_dataframe.drop(columns=["scraping_timestamp"])
 
-    # fix imageurl, for some reason this column is not recognized correctly
-    articles_dataframe["imageurl"] = articles_dataframe["imageUrl"]
-    articles_dataframe = articles_dataframe.drop(columns=["imageUrl"])
+# fix imageurl, for some reason this column is not recognized correctly
+articles_dataframe["imageurl"] = articles_dataframe["imageUrl"]
+articles_dataframe = articles_dataframe.drop(columns=["imageUrl"])
 
 
-    # drop the read_time column
-    articles_dataframe = articles_dataframe.drop(columns=["read_time"])
-    #filtered the duplicates out
-    print(articles_dataframe.shape)
-    new_articles_dataframe = articles_dataframe.drop_duplicates(subset=["urlid"], keep="first", inplace=True)
+# drop the read_time column
+articles_dataframe = articles_dataframe.drop(columns=["read_time"])
 
-    print(articles_dataframe.shape)
+# %%
+print(articles_dataframe["urlid"])
 
-    articles_dataframe.to_sql(name = "articles", con=engine, if_exists="append", index=False)
+# %%
+#filtered the duplicates out
+print(articles_dataframe.shape)
+new_articles_dataframe = articles_dataframe.drop_duplicates(subset=["urlid"], keep="first", inplace=True)
+
+print(articles_dataframe.shape)
+
+# %%
+articles_dataframe.to_sql(name = "articles", con=engine, if_exists="append", index=False)
 
 
