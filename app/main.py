@@ -37,7 +37,7 @@ async def bbc_handler():
 
 @app.route('/cnn/')
 async def cnn_handler():
-    cnn.cnn_scraper()
+    await cnn.cnn_scraper()
 
     return json.dumps({'status': 'started cnn scraping'})
 
