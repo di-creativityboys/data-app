@@ -13,6 +13,7 @@ DB_PORT = os.environ.get("DATABASE_PORT", "5432")
 DB_HOST = os.environ.get("DATABASE_HOST", "localhost")
 
 
+
 async def get_bbc_news():
     options = Options()
     options.add_argument("--headless")
@@ -48,7 +49,13 @@ async def get_bbc_news():
         if category_without_number.endswith('-'):
             category_without_number = category_without_number[:-1]
 
-        return category_without_number
+        index_of_hyphen=category_without_number.rfind('-')#search starting from the right
+        if index_of_hyphen!= -1:#if there was a hyphen
+          result_string=category_without_number[index_of_hyphen+1:]#cut everything to the left
+          return result_string
+        else:
+          return category_without_number
+
 
     def get_topic(url):
         try:
@@ -86,7 +93,6 @@ async def get_bbc_news():
             article = driver.find_element(By.TAG_NAME, "body")
             text_contents.append(article.text)
             # in this test, 3 of 73 articels had no article element.
-            print("article not found")
 
     # here are a few exceptions, because the bbc articles have different html structures
 
@@ -108,7 +114,6 @@ async def get_bbc_news():
                 except:
                     header = "unknown"
                     headers.append(header)
-                    print("no header")
 
     def get_timestamps(time):
      try:
@@ -118,7 +123,6 @@ async def get_bbc_news():
      except:
        date=None
        time.append(date)
-       print('no date')
 
     def get_Image(imageURL, ImageDesc):
         try:
@@ -132,7 +136,6 @@ async def get_bbc_news():
             desc = None
             imageURL.append(url)
             ImageDesc.append(desc)
-    print('no image')
 
     # main method to extract all contents except the authors(might follow later). Runs way faster than the different smaller methods before
     text_contents = []
@@ -196,7 +199,6 @@ async def get_bbc_news():
             "contents": text_contents[i]
         }
         articles_info[i] = article_info_i
-    print(articles_info[20])
 # URLId, Headline, Contents, Authors, UploadDate, ReadTime, ImageURL, ImageDescription
 
     conn = psycopg2.connect(
