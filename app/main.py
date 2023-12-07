@@ -13,7 +13,7 @@ async def index():
     return json.dumps({'name': 'alice',
                        'email': 'alice@outlook.com'})
 
-@app.route('/myinit/')
+@app.route('/init/')
 async def myinit():
     DB_PORT = os.environ.get("DATABASE_PORT", "5432")
     DB_HOST = os.environ.get("DATABASE_HOST", "localhost")
@@ -37,7 +37,7 @@ async def bbc_handler():
 
 @app.route('/cnn/')
 async def cnn_handler():
-    await cnn.cnn_scraper()
+    cnn.cnn_scraper()
 
     return json.dumps({'status': 'started cnn scraping'})
 
