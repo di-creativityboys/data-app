@@ -241,7 +241,7 @@ def filter_format_addToDatabase(articles, engine):
     print(articles_dataframe.shape)
     articles_dataframe.to_sql(name = "articles", con=engine, if_exists="append", index=False)
 
-def cnn_scraper():
+async def cnn_scraper():
     articles = get_articles()
     engine = get_engine()
     filter_format_addToDatabase(articles, engine)

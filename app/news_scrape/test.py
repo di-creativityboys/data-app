@@ -1,6 +1,7 @@
 import asyncio
 import psycopg2
 from bbc.bbc import get_bbc_news
+from cnn import scraper as cnn
 import os
 
 DB_PORT = os.environ.get("DATABASE_PORT", "5432")
@@ -20,7 +21,9 @@ async def main():
     manual_db_init()
     await get_bbc_news()
 
+    await cnn.cnn_scraper()
+
 
 if __name__ == "__main__":
     asyncio.run(main())
-
+    print('test')
