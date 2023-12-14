@@ -2,9 +2,12 @@ from selenium.webdriver import Chrome, ChromeOptions, ChromeService
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 from urllib.parse import urlparse
+from datetime import datetime
+import pytz
 
 
-def extract():
+
+def extract()->dict:
     ########## Setup Selenium
     options = ChromeOptions()
     options.add_argument("--headless")
@@ -53,6 +56,26 @@ def extract():
             else:
                 all_authors.extend(authors)
 
+    germany_timezone = pytz.timezone("Europe/Berlin")
+
+    articles_info = {}
+    for i in range(len(news_urls)):
+        print('iteration',i)
+        article_info_i = {
+            "headline": headers[i],
+            "url": news_urls[i],
+            "date": time[i],
+            "authors": [all_authors[i]],
+            "ImageURL": imageURL[i],
+            "ImageDescription": imageDesc[i],
+            "scrapingTimeStamp": (datetime.now(germany_timezone).isoformat()).split(".")[0],
+            "source": "bbc",
+            "topics": topic[i],
+            "contents": text_contents[i]
+        }
+        articles_info[i] = article_info_i
+
+    return articles_info
 
 #function, that preprocesses the urls, so that the topic can be extracted later
 def url_preprocessing(category):
@@ -167,9 +190,6 @@ def get_authors(article):
                 authors.append(line.replace('By', ''))
         return authors
 
-extract()
-
-            
 
 
    

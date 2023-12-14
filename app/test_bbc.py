@@ -1,7 +1,8 @@
 import asyncio
 
 from database.database import Database
-#TODO: from news_scrape.bbc.bbc_etl import bbc_etl
+from news_scrape.bbc.bbc_etl import bbc_etl
+
 
 
 def manual_db_init():
@@ -14,7 +15,7 @@ def manual_db_init():
 async def main():
     manual_db_init()
 
-    #TODO: bbc_etl()
+    bbc_etl()
 
 
 if __name__ == "__main__":
