@@ -14,4 +14,7 @@
     "sqltools.autoConnectTo": "container-postgres",
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.autoImportCompletions": true,
+    "python.analysis.extraPaths": [
+        "./app"
+    ],
 }
