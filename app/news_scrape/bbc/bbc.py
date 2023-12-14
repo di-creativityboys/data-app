@@ -13,7 +13,6 @@ DB_PORT = os.environ.get("DATABASE_PORT", "5432")
 DB_HOST = os.environ.get("DATABASE_HOST", "localhost")
 
 
-
 async def get_bbc_news():
     options = Options()
     options.add_argument("--headless")
@@ -49,13 +48,14 @@ async def get_bbc_news():
         if category_without_number.endswith('-'):
             category_without_number = category_without_number[:-1]
 
-        index_of_hyphen=category_without_number.rfind('-')#search starting from the right
-        if index_of_hyphen!= -1:#if there was a hyphen
-          result_string=category_without_number[index_of_hyphen+1:]#cut everything to the left
-          return result_string
+        index_of_hyphen = category_without_number.rfind(
+            '-')  # search starting from the right
+        if index_of_hyphen != -1:  # if there was a hyphen
+            # cut everything to the left
+            result_string = category_without_number[index_of_hyphen+1:]
+            return result_string
         else:
-          return category_without_number
-
+            return category_without_number
 
     def get_topic(url):
         try:
@@ -116,13 +116,14 @@ async def get_bbc_news():
                     headers.append(header)
 
     def get_timestamps(time):
-     try:
-       time_element=driver.find_element(By.TAG_NAME, 'time')
-       date=(time_element.get_attribute('datetime'))
-       time.append(date.split(".")[0])#ignore the error, it works when it´s accessed by the main function
-     except:
-       date=None
-       time.append(date)
+        try:
+            time_element = driver.find_element(By.TAG_NAME, 'time')
+            date = (time_element.get_attribute('datetime'))
+            # ignore the error, it works when it´s accessed by the main function
+            time.append(date.split(".")[0])
+        except:
+            date = None
+            time.append(date)
 
     def get_Image(imageURL, ImageDesc):
         try:
@@ -157,10 +158,7 @@ async def get_bbc_news():
             topic_result = get_topic(news_urls[i])
             topic.append(topic_result)
 
-
     extract_all()
-
-   
 
     def get_authors(article):
         authors = []
