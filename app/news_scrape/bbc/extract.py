@@ -1,9 +1,13 @@
 from selenium.webdriver import Chrome, ChromeOptions, ChromeService
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
+from urllib.parse import urlparse
+from datetime import datetime
+import pytz
 
 
-def extract():
+
+def extract()->dict:
     ########## Setup Selenium
     options = ChromeOptions()
     options.add_argument("--headless")
@@ -24,3 +28,168 @@ def extract():
     
     for element in elements_for_url:
         news_urls.append(element.get_attribute("href"))
+
+    # main method to extract all contents except the authors(might follow later). Runs way faster than the different smaller methods before
+    text_contents = []
+    time = []
+    headers = []
+    imageURL = []
+    imageDesc = []
+    topic = []
+
+    #loop through all urls of the articles
+    for i in range(len(news_urls)):
+            # we go to the specific article by using the url
+            driver.get(news_urls[i])
+            get_contents(text_contents,driver)
+            get_timestamps(time,driver)
+            get_headers(headers,driver)
+            get_image(imageURL, imageDesc,driver)
+            get_topic(news_urls[i],topic)
+
+    #in this section, we extract the authors from the contents
+    all_authors = []
+    for article in text_contents:
+            authors = get_authors(article)
+            if not authors:  # Check if authors is an empty list
+                all_authors.append("no author")
+            else:
+                all_authors.extend(authors)
+
+    germany_timezone = pytz.timezone("Europe/Berlin")
+
+    articles_info = {}
+    for i in range(len(news_urls)):
+        print('iteration',i)
+        article_info_i = {
+            "headline": headers[i],
+            "url": news_urls[i],
+            "date": time[i],
+            "authors": [all_authors[i]],
+            "ImageURL": imageURL[i],
+            "ImageDescription": imageDesc[i],
+            "scrapingTimeStamp": (datetime.now(germany_timezone).isoformat()).split(".")[0],
+            "source": "bbc",
+            "topics": topic[i],
+            "contents": text_contents[i]
+        }
+        articles_info[i] = article_info_i
+
+    return articles_info
+
+#function, that preprocesses the urls, so that the topic can be extracted later
+def url_preprocessing(category):
+        # Find the position of the first digit in the category
+        digit_index = next(
+            (index for index, char in enumerate(category) if char.isdigit()), None)
+
+        # Remove everything after the first digit
+        category_without_number = category[:
+                                           digit_index] if digit_index is not None else category
+
+        # Remove trailing hyphen
+        if category_without_number.endswith('-'):
+            category_without_number = category_without_number[:-1]
+
+        index_of_hyphen = category_without_number.rfind(
+            '-')  # search starting from the right
+        if index_of_hyphen != -1:  # if there was a hyphen
+            # cut everything to the left
+            result_string = category_without_number[index_of_hyphen+1:]
+            return result_string
+        else:
+            return category_without_number
+        
+def get_topic(url,topic):
+        try:
+            parsed_url = urlparse(url)
+            path_segments = parsed_url.path.split('/')
+
+            # Find the segment after "news"
+            category_segment_index = path_segments.index("news") + 1
+            category = path_segments[category_segment_index]
+
+            category_without_number = url_preprocessing(category)
+
+            topic.append(category_without_number)
+        except:
+
+            try:
+                parsed_url = urlparse(url)
+                path_segments = parsed_url.path.split('/')
+                category_segment_index = path_segments.index("sport") + 1
+                category = path_segments[category_segment_index]
+
+                category_without_number = url_preprocessing(category)
+
+                topic.append(category_without_number)
+
+            except:
+
+                topic.append("no info")
+            
+def get_contents(text_contents,driver):
+        try:
+            article = driver.find_element(By.TAG_NAME, "article")
+            text_contents.append(article.text)
+        except:  # exception if no article element is there. doesn´t happen often, but has to be handled
+            article = driver.find_element(By.TAG_NAME, "body")
+            text_contents.append(article.text)
+            # in this test, 3 of 73 articels had no article element.
+
+    # here are a few exceptions, because the bbc articles have different html structures
+
+def get_headers(headers,driver):
+        try:
+            header = driver.find_element(By.ID, "main-heading")
+            headers.append(header.text)
+        except:
+            try:
+                header = driver.find_element(
+                    By.CLASS_NAME, "qa-story-headline")
+                headers.append(header.text)
+            except:
+                try:
+                    header = driver.find_element(
+                        By.CLASS_NAME, "article-headline__text"
+                    )
+                    headers.append(header.text)
+                except:
+                    header = "unknown"
+                    headers.append(header)
+
+def get_timestamps(time,driver):
+        try:
+            time_element = driver.find_element(By.TAG_NAME, 'time')
+            date = (time_element.get_attribute('datetime'))
+            # ignore the error, it works when it´s accessed by the main function
+            time.append(date.split(".")[0])
+        except:
+            date = None
+            time.append(date)
+
+def get_image(imageURL, ImageDesc,driver):
+        try:
+            image_element = driver.find_element(By.TAG_NAME, 'img')
+            url = (image_element.get_attribute('src'))
+            desc = (image_element.get_attribute('alt'))
+            imageURL.append(url)
+            ImageDesc.append(desc)
+        except:
+            url = None
+            desc = None
+            imageURL.append(url)
+            ImageDesc.append(desc)
+
+
+def get_authors(article):
+        authors = []
+        lines = article.split("\n")
+        for line in lines[:13]:  # Loop through lines from lines[0] to lines[10]
+            if "By" in line:
+                authors.append(line.replace('By', ''))
+        return authors
+
+
+
+   
