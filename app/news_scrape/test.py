@@ -21,7 +21,7 @@ async def main():
     manual_db_init()
     await get_bbc_news()
 
-    await cnn.cnn_scraper()
+    #await cnn.cnn_scraper()
 
 
 if __name__ == "__main__":

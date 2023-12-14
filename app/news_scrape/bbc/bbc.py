@@ -35,7 +35,7 @@ async def get_bbc_news():
 
     get_urls()
 
-    def remove_numbers(category):
+    def url_preprocessing(category):
         # Find the position of the first digit in the category
         digit_index = next(
             (index for index, char in enumerate(category) if char.isdigit()), None)
@@ -62,11 +62,11 @@ async def get_bbc_news():
             parsed_url = urlparse(url)
             path_segments = parsed_url.path.split('/')
 
-# Find the segment after "news"
+            # Find the segment after "news"
             category_segment_index = path_segments.index("news") + 1
             category = path_segments[category_segment_index]
 
-            category_without_number = remove_numbers(category)
+            category_without_number = url_preprocessing(category)
 
             return category_without_number
         except:
@@ -77,7 +77,7 @@ async def get_bbc_news():
                 category_segment_index = path_segments.index("sport") + 1
                 category = path_segments[category_segment_index]
 
-                category_without_number = remove_numbers(category)
+                category_without_number = url_preprocessing(category)
 
                 return category_without_number
 
