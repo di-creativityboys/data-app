@@ -2,7 +2,7 @@ from gettext import translation
 import pandas as pd
 from sqlalchemy import create_engine
 
-from article import Article
+from news_scrape.cnn.article import Article
 
 engine = create_engine(f'postgresql://postgres:postgres@localhost:5432/postgres')
 

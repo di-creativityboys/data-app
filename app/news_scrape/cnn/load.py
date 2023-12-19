@@ -1,4 +1,4 @@
-from article import Article
+from news_scrape.cnn.article import Article
 import pandas as pd
 from sqlalchemy import create_engine
 
