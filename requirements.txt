@@ -16,3 +16,4 @@ requests-oauthlib
 tweepy
 sqlalchemy
 nltk
+scikit-learn
