@@ -25,6 +25,7 @@ def get_unsplash(amount_of_images,search_query):#search query must be a string o
 
 
 
+
 # %%
 #important to get the name of the photograph and the url, because unsplash wants you to credit the photograph and themselves when using an image
  def display_images(images_data):
@@ -35,6 +36,9 @@ def get_unsplash(amount_of_images,search_query):#search query must be a string o
     display(Image(url=foto_url))
 
  display_images(data)
+
+get_unsplash(3,search_query='gaza')
+
 
 # %%
 #save_image has to be modified to a common save space. Or just exported to the frontend
