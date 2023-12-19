@@ -9,7 +9,9 @@ CREATE TABLE IF NOT EXISTS Articles (
     imageDescription text,
     scrapingTimestamp timestamp NOT NULL,
     source text,
-    topic text
+    topic text,
+    clusterId int,
+    clusterTopic text
 );
 
 -- Create Table for scraped Tweets
@@ -42,7 +44,5 @@ CREATE TABLE IF NOT EXISTS Tweets (
     photoLinks varchar [],
     videoLinks varchar [],
     animatedLinks varchar [],
-    scrapingTimeStamp timestamp NOT NULL,
-    clusterId int,
-    clusterTopic text
+    scrapingTimeStamp timestamp NOT NULL
 );
