@@ -10,5 +10,3 @@ def cnn_etl():
     transformed_articles = transform(extracted_articles)
     print(transformed_articles)
     load(transformed_articles)
-
-cnn_etl()
