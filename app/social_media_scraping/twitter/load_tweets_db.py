@@ -1,19 +1,20 @@
-from .scrape_twitter import *
 import pandas as pd
 import psycopg2
-import os
+from social_media_scraping.twitter.scrape_twitter import gettweets
+# import os
+from database.database import Database
 
-DB_PORT = os.environ.get("DATABASE_PORT", "5432")
-DB_HOST = os.environ.get("DATABASE_HOST", "localhost")
+# DB_PORT = os.environ.get("DATABASE_PORT", "5432")
+# DB_HOST = os.environ.get("DATABASE_HOST", "localhost")
 
 
-def insert_into_database(df_tweets: pd.DataFrame, cursor):
+def insert_into_database(df_tweets: pd.DataFrame, database: Database):
 
-    df_tweets.rename(columns={
-                     'url': 'tweet_url', 'date': 'publish_date', 'user': 'tweet_user'}, inplace=True)
+    df_tweets.rename(columns={'url': 'tweet_url', 'date': 'publish_date', 'user': 'tweet_user'}, inplace=True)
+
     for index, row in df_tweets.iterrows():
         try:
-            cursor.execute('''INSERT INTO Tweets (
+            database.execute('''INSERT INTO Tweets (
                                 id,
                                 tweetUrl,
                                 publishDatetime,
@@ -76,28 +77,31 @@ def insert_into_database(df_tweets: pd.DataFrame, cursor):
 
 
 async def scrape_twitter(user_name, limit):
-    # input username and amount of tweets requested
-    # user_name = input("Input the username: ")
-    # limit = int(input("Input the amount of tweets to get: "))
+    # parameters: twitter username and amount of tweets requested
+
     # scrape
-    result = await gettweets(user_name, limit)
+    scraped_tweets = await gettweets(user_name, limit)
 
     # prepare to load in db
-    df_tweets = pd.DataFrame(result)
+    df_tweets = pd.DataFrame(scraped_tweets)
 
     # create db connection
-    conn = psycopg2.connect(dbname="postgres", user="postgres",
-                            password="postgres", port=DB_PORT, host=DB_HOST)
-    conn.autocommit = True
-    cursor = conn.cursor()
+    database = Database()
+    database.open_connection()
+
 
     # insert tweets of user into database
-    insert_into_database(df_tweets, cursor)
+    insert_into_database(df_tweets, database)
+
     # insert retweeted tweets into database
     df_retweetedTweets = df_tweets['retweetedTweet'].dropna().to_list()
     df_retweeted = pd.DataFrame(df_retweetedTweets)
-    insert_into_database(df_retweeted, cursor)
+    insert_into_database(df_retweeted, database)
+
     # insert quoted tweets into database
     df_quotedTweets = df_tweets['quotedTweet'].dropna().to_list()
     df_quoted = pd.DataFrame(df_quotedTweets)
-    insert_into_database(df_quoted, cursor)
+    insert_into_database(df_quoted, database)
+
+    # close db connection
+    database.close_connection()

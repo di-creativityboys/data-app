@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup, Tag
 import pandas as pd
 import requests
 
-from database.models.article import Article
+from article import Article
 
 
 MAINPAGE = "edition.cnn.com"
@@ -46,32 +46,30 @@ def create_article_from_link(link: str) -> Article:
     article_soup = get_soup(link)
     headline = get_headline(article_soup)
     content = get_content(article_soup)
-    author = get_authors(article_soup)
+    authors = get_authors(article_soup)
     date = get_date(article_soup)
-    read_time = get_read_time(article_soup)
+    #read_time = get_read_time(article_soup)
     url = link
-    image = get_image(article_soup)
+    image_tuple = get_image_tuple(article_soup)
+    topic = get_topic(article_soup)
 
     # TODO:
     return Article(urlId=url,
                    headline=headline,
                    content=content,
-                   authors=None,
-                   upload_timestamp=None,
-                   imageURL=None,
-                   imageDescription=None,
+                   authors=authors, # where is the get authors method
+                   upload_timestamp=date, # the upload timestamp
+                   imageURL=image_tuple[0], # the image url 
+                   imageDescription=image_tuple[1], # the image description 
                    scrapingTimestamp=pd.Timestamp.now(),
                    source="cnn",
-                   topic=None)
+                   topic=topic)
 
 def get_headline(article_soup: BeautifulSoup):
     headline = ""
-    
     tag_or_navigatablestring = article_soup.find("h1")
-    
     if tag_or_navigatablestring is not None:
         headline = tag_or_navigatablestring.text
-
     return headline
 
 def get_content(article_soup: BeautifulSoup):
@@ -115,13 +113,25 @@ def get_read_time(article_soup: BeautifulSoup):
     read_time: int = extract_read_time_from_string(read_time_tag.text)
     return read_time
 
-def get_image(article_soup: BeautifulSoup) -> Image:
+def get_image_tuple(article_soup: BeautifulSoup) -> tuple:
     image_tag = article_soup.find(is_image)
     if image_tag is not None:
         # modify this
-        return Image(url=image_tag['src'], description=image_tag['alt'])
+        return (image_tag['src'], image_tag['alt'])
     else:
-        return Image("", "")
+        return ("", "")
+
+def get_topic(article_soup : BeautifulSoup):
+    topic_tag = article_soup.find("a", class_="brand-logo__theme-link")
+    if type(topic_tag) == Tag:
+        link = topic_tag["href"]
+        if type(link) == str:
+            link_list = link.split("/")
+            return link_list[-1]
+    return ''
+
+def is_topic(tag : Tag):
+    return tag.get_attribute_list("class")[0] == "brand-logo__theme-link"
     
 def is_paragraph(tag: Tag) -> bool:
     return tag.has_attr("data-component-name") and tag.name == "p"
@@ -129,7 +139,6 @@ def is_paragraph(tag: Tag) -> bool:
 
 def is_author(tag: Tag) -> bool:
     return tag.get_attribute_list("class")[0] == "byline__name"
-
 
 def is_date(tag: Tag):
     return tag.get_attribute_list("class")[0] == "timestamp"
