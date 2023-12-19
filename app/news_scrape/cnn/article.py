@@ -1,5 +1,7 @@
 import pandas as pd
 
+# import failed in every possible way. Possible solution: make it a module with __init__ file????
+
  # upload_timestamp changed to uploadtimestamp
 class Article():
     def __init__(self,
