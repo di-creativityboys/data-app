@@ -1,10 +1,14 @@
-from database.models.article import Article
+from article import Article
 
-from news_scrape.cnn.extract import extract
-from news_scrape.cnn.transform import transform
-from news_scrape.cnn.load import load
+from extract import extract
+from transform import transform
+from load import load
+
 
 def cnn_etl():
-    extracted_articles: list[Article] = extract()
-    transformed_articles: list[Article] = transform(extracted_articles)
+    extracted_articles = extract()
+    transformed_articles = transform(extracted_articles)
+    print(transformed_articles)
     load(transformed_articles)
+
+cnn_etl()
