@@ -4,4 +4,4 @@ from sqlalchemy import create_engine
 
 def load(articles: pd.DataFrame):
     engine = create_engine(f'postgresql://postgres:postgres@localhost:5432/postgres')
-    articles.to_sql(name = "articles", con=engine, if_exists="append", index=False)
+    articles.to_sql(name = "articles", con=engine, if_exists="replace", index=False)
