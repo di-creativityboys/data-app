@@ -27,7 +27,11 @@ def extract()->dict:
     elements_for_url = driver.find_elements(By.CLASS_NAME, "gs-c-promo-heading")
     
     for element in elements_for_url:
-        news_urls.append(element.get_attribute("href"))
+        url_to_article=element.get_attribute('href')
+        if url_to_article is None:
+            continue
+
+        news_urls.append(url_to_article)
 
     # main method to extract all contents except the authors(might follow later). Runs way faster than the different smaller methods before
     text_contents = []
