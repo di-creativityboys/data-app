@@ -15,6 +15,7 @@
     "python.analysis.typeCheckingMode": "basic",
     "python.analysis.autoImportCompletions": true,
     "python.analysis.extraPaths": [
+        "./app",
         "./app"
     ],
     "python.languageServer": "Pylance",

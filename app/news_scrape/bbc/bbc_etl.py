@@ -1,4 +1,3 @@
-from database.models.article import Article
 
 from news_scrape.bbc.extract import extract
 from news_scrape.bbc.transform import transform
