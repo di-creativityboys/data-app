@@ -17,3 +17,4 @@ tweepy
 sqlalchemy
 nltk
 scikit-learn
+matplotlib

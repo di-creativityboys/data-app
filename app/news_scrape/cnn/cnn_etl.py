@@ -1,8 +1,8 @@
-from article import Article
+# from article import Article
 
-from extract import extract
-from transform import transform
-from load import load
+from news_scrape.cnn.extract import extract
+from news_scrape.cnn.transform import transform
+from news_scrape.cnn.load import load
 
 
 def cnn_etl():

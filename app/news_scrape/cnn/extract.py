@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup, Tag
 import pandas as pd
 import requests
 
-from article import Article
+from news_scrape.cnn.article import Article
 
 
 MAINPAGE = "edition.cnn.com"

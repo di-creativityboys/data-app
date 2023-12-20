@@ -13,7 +13,7 @@ def manual_db_init():
 
 async def main():
     manual_db_init()
-
+    
     cnn_etl()
 
 
