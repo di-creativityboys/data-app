@@ -175,6 +175,6 @@ def extract(steps,user):#steps=how far do we want to scroll
 
    return filtered_tweets
 
-extract(2,'BarackObama')
+#extract(2,'BarackObama')
 
 
