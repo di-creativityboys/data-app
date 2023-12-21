@@ -1,9 +1,14 @@
 import sys
-sys.path.insert(0,'/workspaces/data-app/app/')
+import os
+
+if os.environ.get("MY_PRODUCTION") == "production":
+    sys.path.insert(0, "/app/app/")
+else:
+    sys.path.insert(0, "/workspaces/data-app/app/")
 
 import json
 import psycopg2
-import os
+
 from flask import Flask
 
 app = Flask(__name__)

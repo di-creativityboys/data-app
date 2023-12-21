@@ -3,6 +3,7 @@ FROM python:3.11-bullseye
 WORKDIR /app
 
 ENV PYTHONUNBUFFERED 1
+ENV MY_PRODUCTION="production"
 
 COPY requirements.txt /tmp/pip-tmp/
 RUN pip3 --disable-pip-version-check --no-cache-dir install -r /tmp/pip-tmp/requirements.txt \
