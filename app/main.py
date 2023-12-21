@@ -1,3 +1,6 @@
+import sys
+sys.path.insert(0,'/workspaces/data-app/app/')
+
 import json
 import psycopg2
 import os
@@ -54,4 +57,4 @@ async def scrape_twitter_api(name):
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=False)
