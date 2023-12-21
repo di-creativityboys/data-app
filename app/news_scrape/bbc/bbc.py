@@ -9,8 +9,8 @@ from datetime import datetime
 import pytz
 from urllib.parse import urlparse
 
-DB_PORT = os.environ.get("DATABASE_PORT", "5432")
-DB_HOST = os.environ.get("DATABASE_HOST", "localhost")
+DB_PORT: str = os.environ.get("DATABASE_PORT", default="5432")
+DB_HOST: str = os.environ.get("DATABASE_HOST", default="localhost")
 
 
 async def get_bbc_news():
@@ -18,18 +18,14 @@ async def get_bbc_news():
     options.add_argument("--headless")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
-    driver = webdriver.Chrome(
-        service=Service(ChromeDriverManager().install()),
-        options=options
-    )
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
     driver.get("https://www.bbc.com/news")
 
     news_urls = []
 
     def get_urls():
-        elements_for_url = driver.find_elements(
-            By.CLASS_NAME, "gs-c-promo-heading")
+        elements_for_url = driver.find_elements(By.CLASS_NAME, "gs-c-promo-heading")
         for element in elements_for_url:
             news_urls.append(element.get_attribute("href"))
 
@@ -37,22 +33,19 @@ async def get_bbc_news():
 
     def url_preprocessing(category):
         # Find the position of the first digit in the category
-        digit_index = next(
-            (index for index, char in enumerate(category) if char.isdigit()), None)
+        digit_index = next((index for index, char in enumerate(category) if char.isdigit()), None)
 
-    # Remove everything after the first digit
-        category_without_number = category[:
-                                           digit_index] if digit_index is not None else category
+        # Remove everything after the first digit
+        category_without_number = category[:digit_index] if digit_index is not None else category
 
-    # Remove trailing hyphen
-        if category_without_number.endswith('-'):
+        # Remove trailing hyphen
+        if category_without_number.endswith("-"):
             category_without_number = category_without_number[:-1]
 
-        index_of_hyphen = category_without_number.rfind(
-            '-')  # search starting from the right
+        index_of_hyphen = category_without_number.rfind("-")  # search starting from the right
         if index_of_hyphen != -1:  # if there was a hyphen
             # cut everything to the left
-            result_string = category_without_number[index_of_hyphen+1:]
+            result_string = category_without_number[index_of_hyphen + 1 :]
             return result_string
         else:
             return category_without_number
@@ -60,7 +53,7 @@ async def get_bbc_news():
     def get_topic(url):
         try:
             parsed_url = urlparse(url)
-            path_segments = parsed_url.path.split('/')
+            path_segments = parsed_url.path.split("/")
 
             # Find the segment after "news"
             category_segment_index = path_segments.index("news") + 1
@@ -70,10 +63,9 @@ async def get_bbc_news():
 
             return category_without_number
         except:
-
             try:
                 parsed_url = urlparse(url)
-                path_segments = parsed_url.path.split('/')
+                path_segments = parsed_url.path.split("/")
                 category_segment_index = path_segments.index("sport") + 1
                 category = path_segments[category_segment_index]
 
@@ -82,7 +74,6 @@ async def get_bbc_news():
                 return category_without_number
 
             except:
-
                 return "no info"
 
     def extract_contents(text_contents):
@@ -102,34 +93,30 @@ async def get_bbc_news():
             headers.append(header.text)
         except:
             try:
-                header = driver.find_element(
-                    By.CLASS_NAME, "qa-story-headline")
+                header = driver.find_element(By.CLASS_NAME, "qa-story-headline")
                 headers.append(header.text)
             except:
                 try:
-                    header = driver.find_element(
-                        By.CLASS_NAME, "article-headline__text"
-                    )
+                    header = driver.find_element(By.CLASS_NAME, "article-headline__text")
                     headers.append(header.text)
                 except:
                     header = "unknown"
                     headers.append(header)
 
     def get_timestamps(time):
-        try:
-            time_element = driver.find_element(By.TAG_NAME, 'time')
-            date = (time_element.get_attribute('datetime'))
-            # ignore the error, it works when it´s accessed by the main function
-            time.append(date.split(".")[0])
-        except:
-            date = None
-            time.append(date)
+        time_element = driver.find_element(By.TAG_NAME, "time")
+        date: str | None = time_element.get_attribute(name="datetime")
+
+        if type(date) == str:
+            date = date.split(sep=".")[0]
+
+        time.append(date)
 
     def get_Image(imageURL, ImageDesc):
         try:
-            image_element = driver.find_element(By.TAG_NAME, 'img')
-            url = (image_element.get_attribute('src'))
-            desc = (image_element.get_attribute('alt'))
+            image_element = driver.find_element(By.TAG_NAME, "img")
+            url = image_element.get_attribute("src")
+            desc = image_element.get_attribute("alt")
             imageURL.append(url)
             ImageDesc.append(desc)
         except:
@@ -165,7 +152,7 @@ async def get_bbc_news():
         lines = article.split("\n")
         for line in lines[:13]:  # Loop through lines from lines[0] to lines[10]
             if "By" in line:
-                authors.append(line.replace('By', ''))
+                authors.append(line.replace("By", ""))
         return authors
 
     all_authors = []
@@ -194,10 +181,10 @@ async def get_bbc_news():
             "scrapingTimeStamp": (datetime.now(germany_timezone).isoformat()).split(".")[0],
             "source": "bbc",
             "topics": topic[i],
-            "contents": text_contents[i]
+            "contents": text_contents[i],
         }
         articles_info[i] = article_info_i
-# URLId, Headline, Contents, Authors, UploadDate, ReadTime, ImageURL, ImageDescription
+    # URLId, Headline, Contents, Authors, UploadDate, ReadTime, ImageURL, ImageDescription
 
     conn = psycopg2.connect(
         dbname="postgres",
@@ -211,12 +198,22 @@ async def get_bbc_news():
 
     for article in articles_info.values():
         try:
-            cursor.execute('''INSERT INTO Articles(URLId, Headline, Content, Authors, UploadTimestamp, ImageURL, ImageDescription,scrapingTimeStamp, source, topic) 
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s,%s);''',
-                           (article["url"], article["headline"], article["contents"], article["authors"], article["date"],
-                            article["ImageURL"], article["ImageDescription"], article["scrapingTimeStamp"], article["source"], article["topics"])
-                           )
+            cursor.execute(
+                query="""INSERT INTO Articles(URLId, Headline, Content, Authors, UploadTimestamp, ImageURL, ImageDescription, scrapingTimeStamp, source, topic) 
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s,%s);""",
+                vars=(
+                    article["url"],
+                    article["headline"],
+                    article["contents"],
+                    article["authors"],
+                    article["date"],
+                    article["ImageURL"],
+                    article["ImageDescription"],
+                    article["scrapingTimeStamp"],
+                    article["source"],
+                    article["topics"],
+                ),
+            )
         except psycopg2.IntegrityError as e:
             if "duplicate key value violates unique constraint" in str(e):
-                print(
-                    f"Article with URLId {article['url']} already exists in the database.")
+                print(f"Article with URLId {article['url']} already exists in the database.")

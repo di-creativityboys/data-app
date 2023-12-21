@@ -1,6 +1,7 @@
 import tweepy
 import asyncio
 
+
 async def post_tweet(contents):
     # Your app's bearer token can be found under the Authentication Tokens section
     # of the Keys and Tokens tab of your app, under the
@@ -29,8 +30,7 @@ async def post_tweet(contents):
     # You can provide the consumer key and secret with the access token and access
     # token secret to authenticate as a user
     client = tweepy.Client(
-        consumer_key=consumer_key, consumer_secret=consumer_secret,
-        access_token=access_token, access_token_secret=access_token_secret
+        consumer_key=consumer_key, consumer_secret=consumer_secret, access_token=access_token, access_token_secret=access_token_secret
     )
     # Create Tweet
 
@@ -40,17 +40,17 @@ async def post_tweet(contents):
     # Twitter Developer Portal Projects & Apps page at
     # https://developer.twitter.com/en/portal/projects-and-apps
 
-    # Make sure to reauthorize your app / regenerate your access token and secret 
+    # Make sure to reauthorize your app / regenerate your access token and secret
     # after setting the Write permission
 
-    response = client.create_tweet(
-        text = contents
-    )
+    response = client.create_tweet(text=contents)
     print(f"https://twitter.com/user/status/{response.data['id']}")
+
 
 async def main():
     tweet = input("Input the tweet that you want to post.\n")
     await post_tweet(tweet)
 
+
 if __name__ == "__main__":
-     asyncio.run(main())
+    asyncio.run(main())

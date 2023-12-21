@@ -18,8 +18,12 @@
 				"mtxr.sqltools-driver-sqlite",
 				"mtxr.sqltools-driver-pg",
 				"ms-python.python",
-				//"ms-python.vscode-pylance",
-				"ms-python.autopep8"
+				"ms-python.black-formatter",
+				"ms-toolsai.datawrangler",
+				"ms-dotnettools.vscode-dotnet-runtime",
+				"IgorSbitnev.error-gutters",
+				"ms-python.isort",
+				"ms-python.vscode-pylance"
 			]
 		}
 	},

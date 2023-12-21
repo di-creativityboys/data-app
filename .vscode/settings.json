@@ -16,7 +16,22 @@
     "python.analysis.autoImportCompletions": true,
     "python.analysis.extraPaths": [
         "./app",
-        "./app"
     ],
     "python.languageServer": "Pylance",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true,
+    },
+    "black-formatter.args": [
+        "--line-length=140",
+    ],
+    "python.analysis.inlayHints.functionReturnTypes": true,
+    "python.analysis.inlayHints.pytestParameters": true,
+    "python.analysis.inlayHints.callArgumentNames": "all",
+    "python.analysis.inlayHints.variableTypes": true,
+    "python.terminal.activateEnvInCurrentTerminal": true,
+    //"python.analysis.diagnosticMode": "workspace",
+    "editor.wordWrapColumn": 140,
+    "editor.wordWrap": "wordWrapColumn",
+    
 }
