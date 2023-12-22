@@ -13,7 +13,7 @@ from flask import Flask
 
 app = Flask(__name__)
 
-from news_scrape.bbc import bbc
+from news_scrape.bbc import bbc_etl
 from news_scrape.cnn import scraper as cnn
 from social_media_scraping.twitter import load_tweets_db as twitter
 
@@ -41,7 +41,7 @@ async def myinit():
 
 @app.route("/bbc/")
 async def bbc_handler():
-    await bbc.get_bbc_news()
+    bbc_etl.bbc_etl()
 
     return json.dumps({"status": "started bbc scraping"})
 
