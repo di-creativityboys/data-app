@@ -1,2 +1,2 @@
-def transform(tweets)->dict:
+def transform(tweets: dict) -> dict:
     return tweets

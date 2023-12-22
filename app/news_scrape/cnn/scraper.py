@@ -31,34 +31,38 @@ MAINPAGE = "edition.cnn.com"
 HTTPS_SUFFIX = "https://"
 MAINPAGE_LINK = f"{HTTPS_SUFFIX}{MAINPAGE}"
 
+
 # added using Google Colab - R.H 04.12
-def get_keywords(link : str) -> List[str]:
-  split_link = link.split("/")
-  split_link.remove('https:')
-  split_link.remove('')
-  split_link.remove('edition.cnn.com')
-  split_link.remove("index.html")
+def get_keywords(link: str) -> List[str]:
+    split_link = link.split("/")
+    split_link.remove("https:")
+    split_link.remove("")
+    split_link.remove("edition.cnn.com")
+    split_link.remove("index.html")
+
+    keywords = []
+    for part in split_link:
+        if "-" in part:
+            keywords = keywords + part.split("-")
+            split_link.remove(part)
+
+    keywords = keywords + split_link
+    return keywords
 
 
-  keywords = []
-  for part in split_link:
-    if  "-" in part:
-      keywords = keywords + part.split("-")
-      split_link.remove(part)
-
-  keywords = keywords + split_link
-  return keywords
-
-class Image():
-    def __init__(self, url : str, description : str):
+class Image:
+    def __init__(self, url: str, description: str):
         self.url = url
         self.description = description
 
     def __str__(self):
-        return f'Photo description: {self.description}'
+        return f"Photo description: {self.description}"
 
-class Article():
-    def __init__(self, headline : str, content : str, authors : List[str], upload_timestamp : pd.Timestamp, read_time : int, url : str, image : Image):
+
+class Article:
+    def __init__(
+        self, headline: str, content: str, authors: List[str], upload_timestamp: pd.Timestamp, read_time: int, url: str, image: Image
+    ):
         self.headline = headline
         self.content = content
         self.authors = authors
@@ -67,52 +71,56 @@ class Article():
         self.url = url
         self.imageUrl = image.url
         self.description = image.description
-        self.source = 'CNN'
-        self.topic = get_keywords(url) # added using Google Colab - R.H 04.12
-
+        self.source = "CNN"
+        self.topic = get_keywords(url)  # added using Google Colab - R.H 04.12
 
         self.scraping_timestamp = pd.to_datetime(datetime.now())
 
-
     def __str__(self):
-        string : str = ""
+        string: str = ""
         return f"{self.headline}  by {self.authors}  {self.read_time}\n {self.content} \n"
 
-def get_soup(url : str)-> BeautifulSoup | None:
+
+def get_soup(url: str) -> BeautifulSoup | None:
     article = requests.get(url).text
     if article:
         return BeautifulSoup(article)
     else:
         print("Error fetching the soup object")
 
-def get_content(article_soup : BeautifulSoup):
+
+def get_content(article_soup: BeautifulSoup):
     paragraphs = [paragraph.text for paragraph in article_soup.find_all(is_paragraph)]
     string = ""
     for paragraph in paragraphs:
         string = f"{string} {paragraph}"
     return string
 
-def get_article_links(mainpage_soup : BeautifulSoup) -> list:
-    results = mainpage_soup.find_all(name="a", attrs={"data-link-type" : "article"})
+
+def get_article_links(mainpage_soup: BeautifulSoup) -> list:
+    results = mainpage_soup.find_all(name="a", attrs={"data-link-type": "article"})
     results = [f'{MAINPAGE_LINK}{result.attrs["href"]}' for result in results]
     print(results)
     return results
 
-def get_headline(article_soup : BeautifulSoup):
+
+def get_headline(article_soup: BeautifulSoup):
     return article_soup.find("h1").text
 
-def get_authors(article_soup : BeautifulSoup) -> List[str]:
+
+def get_authors(article_soup: BeautifulSoup) -> List[str]:
     author_tags = article_soup.find_all(is_author)
     names = [tag.string for tag in author_tags]
     return names
 
-def get_date(article_soup : BeautifulSoup) -> pd.Timestamp:
+
+def get_date(article_soup: BeautifulSoup) -> pd.Timestamp:
     date_tag = article_soup.find(is_date)
     date_string = date_tag.text
 
     # the following code just extracts the datetime from the given date
     splitted_date = date_string.split(",")
-    unstructured_time = splitted_date[0].split("\n") # the time is in the 3rd index, look down
+    unstructured_time = splitted_date[0].split("\n")  # the time is in the 3rd index, look down
     time = unstructured_time[2].lstrip()
     datetime_string_format = f"{time.split(' ')[0]} {time.split(' ')[1]},{splitted_date[-2]},{splitted_date[-1].rstrip()}"
     print(datetime_string_format)
@@ -120,35 +128,44 @@ def get_date(article_soup : BeautifulSoup) -> pd.Timestamp:
 
     return datetime_correct
 
+
 # since the read time is not stored in the database, this line is obsolete
-def get_read_time(article_soup : BeautifulSoup):
+def get_read_time(article_soup: BeautifulSoup):
     # a read time of 0 is used to signify an article whose reading time could not be fetched.
-    read_time_tag = article_soup.find("div", attrs={"class" : ["headline__sub-description"]})  #[15:28] the slicing caused an error so I removed it for testing purposes
+    read_time_tag = article_soup.find(
+        "div", attrs={"class": ["headline__sub-description"]}
+    )  # [15:28] the slicing caused an error so I removed it for testing purposes
     if read_time_tag is None:
         return ""
-    read_time : int = extract_read_time_from_string(read_time_tag.text)
+    read_time: int = extract_read_time_from_string(read_time_tag.text)
     return read_time
 
-def get_image(article_soup : BeautifulSoup) -> Image:
+
+def get_image(article_soup: BeautifulSoup) -> Image:
     image_tag = article_soup.find(is_image)
     if image_tag is not None:
-        return Image(url=image_tag['src'], description=image_tag['alt']) # modify this
+        return Image(url=image_tag["src"], description=image_tag["alt"])  # modify this
     else:
         return Image("", "")
 
-def is_paragraph(tag : Tag) -> bool:
+
+def is_paragraph(tag: Tag) -> bool:
     return tag.has_attr("data-component-name") and tag.name == "p"
 
-def is_author(tag : Tag) -> bool:
+
+def is_author(tag: Tag) -> bool:
     return tag.get_attribute_list("class")[0] == "byline__name"
 
-def is_date(tag : Tag):
+
+def is_date(tag: Tag):
     return tag.get_attribute_list("class")[0] == "timestamp"
 
-def is_image(tag : Tag) -> bool:
+
+def is_image(tag: Tag) -> bool:
     return tag.has_attr("src") and tag.has_attr("alt") and tag.name == "img"
 
-def extract_read_time_from_string(read_time_string : str) -> int:
+
+def extract_read_time_from_string(read_time_string: str) -> int:
     # returns 0 if the read_time integer cannot be successfully extracted
     read_time = 0
     for character in read_time_string:
@@ -158,8 +175,13 @@ def extract_read_time_from_string(read_time_string : str) -> int:
             pass
     return read_time
 
-def create_article_from_link(link : str) ->Article:
+
+def create_article_from_link(link: str) -> Article:
     article_soup = get_soup(link)
+
+    if article_soup is None:
+        raise TypeError("article_soup is None!")
+
     headline = get_headline(article_soup)
     content = get_content(article_soup)
     author = get_authors(article_soup)
@@ -168,10 +190,18 @@ def create_article_from_link(link : str) ->Article:
     url = link
     image = get_image(article_soup)
 
+    if type(read_time) is not int:
+        raise TypeError("read_time is not an int!")
+
     return Article(headline, content, author, date, read_time, url, image)
+
 
 def get_articles():
     mainpage_soup = get_soup(MAINPAGE_LINK)
+
+    if mainpage_soup is None:
+        raise TypeError("article_soup is None!")
+
     links = get_article_links(mainpage_soup)
 
     articles = []
@@ -181,18 +211,21 @@ def get_articles():
             articles.append(article)
         except Exception as e:
             print(f"Following error: {str(e)}")
-    
+
     return articles
+
 
 """##### This is where I try to connect to the postgres database and execute the insert statements"""
 
-#pip install sqlalchemy
+# pip install sqlalchemy
+
 
 # the database connection code is postgres
 def get_engine():
-    return create_engine(f'postgresql://postgres:postgres@localhost:5432/postgres')
+    return create_engine(f"postgresql://postgres:postgres@localhost:5432/postgres")
 
-def filter_articles(articles : List[Article], engine) -> List[Article]:
+
+def filter_articles(articles: List[Article], engine) -> List[Article]:
     new_articles = []
     articles_already_present = pd.read_sql_table("articles", con=engine)
     #  print(articles_already_present.info()) # logging
@@ -210,23 +243,25 @@ def filter_articles(articles : List[Article], engine) -> List[Article]:
 
 
 def filter_format_addToDatabase(articles, engine):
-    new_articles = filter_articles(articles, engine) # filtered against existing articles in database
+    new_articles = filter_articles(articles, engine)  # filtered against existing articles in database
 
-    article_dicts = [article.__dict__ for article in new_articles] # this dictionary only contains the articles that are not in the database already
+    article_dicts = [
+        article.__dict__ for article in new_articles
+    ]  # this dictionary only contains the articles that are not in the database already
 
-    #this dataframe contains the data to be inserted to the articles table
+    # this dataframe contains the data to be inserted to the articles table
 
     articles_dataframe = pd.DataFrame(article_dicts)
-    #change the name of url to urlid
+    # change the name of url to urlid
     articles_dataframe["urlid"] = articles_dataframe["url"]
     articles_dataframe = articles_dataframe.drop(columns=["url"])
     # change the name of description to image description
     articles_dataframe["imagedescription"] = articles_dataframe["description"]
     articles_dataframe = articles_dataframe.drop(columns=["description"])
-    #change the name of upload_timestamp to uploadtimestamp
+    # change the name of upload_timestamp to uploadtimestamp
     articles_dataframe["uploadtimestamp"] = articles_dataframe["upload_timestamp"]
     articles_dataframe = articles_dataframe.drop(columns=["upload_timestamp"])
-    #change the name of upload_timestamp to uploadtimestamp
+    # change the name of upload_timestamp to uploadtimestamp
     articles_dataframe["scrapingtimestamp"] = articles_dataframe["scraping_timestamp"]
     articles_dataframe = articles_dataframe.drop(columns=["scraping_timestamp"])
     # fix imageurl, for some reason this column is not recognized correctly
@@ -235,11 +270,12 @@ def filter_format_addToDatabase(articles, engine):
     # drop the read_time column
     articles_dataframe = articles_dataframe.drop(columns=["read_time"])
     print(articles_dataframe["urlid"])
-    #filtered the duplicates out
+    # filtered the duplicates out
     print(articles_dataframe.shape)
     articles_dataframe.drop_duplicates(subset=["urlid"], keep="first", inplace=True)
     print(articles_dataframe.shape)
-    articles_dataframe.to_sql(name = "articles", con=engine, if_exists="append", index=False)
+    articles_dataframe.to_sql(name="articles", con=engine, if_exists="append", index=False)
+
 
 async def cnn_scraper():
     articles = get_articles()

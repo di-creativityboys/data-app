@@ -11,12 +11,12 @@ def manual_db_init():
     database.close_connection()
     print("DB initialized")
 
+
 async def main():
     manual_db_init()
-    
+
     cnn_etl()
 
 
 if __name__ == "__main__":
     asyncio.run(main())
-    print('test')

@@ -60,3 +60,4 @@ CREATE TABLE IF NOT EXISTS TweetsNew (
     profilImage text,
     scrapingTimeStamp timestamp NOT NULL
 );
+

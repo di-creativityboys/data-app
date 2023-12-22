@@ -1,20 +1,20 @@
 import pandas as pd
 
-# import failed in every possible way. Possible solution: make it a module with __init__ file????
 
- # upload_timestamp changed to uploadtimestamp
-class Article():
-    def __init__(self,
-                 urlId: str,
-                 headline: str | None,
-                 content: str | None,
-                 authors: list[str] | None,
-                 upload_timestamp: pd.Timestamp | None,
-                 imageURL: str | None,
-                 imageDescription: str | None,
-                 scrapingTimestamp: pd.Timestamp,
-                 source: str | None,
-                 topic: str | None):
+class Article:
+    def __init__(
+        self,
+        urlId: str,
+        headline: str | None,
+        content: str | None,
+        authors: list[str] | None,
+        upload_timestamp: pd.Timestamp | None,
+        imageURL: str | None,
+        imageDescription: str | None,
+        scrapingTimestamp: pd.Timestamp,
+        source: str | None,
+        topic: str | None,
+    ):
         self.urlId: str = urlId
         self.headline: str | None = headline
         self.content: str | None = content
@@ -36,7 +36,7 @@ class Article():
         dataFrame["headline"] = self.headline
         dataFrame["content"] = self.content
         dataFrame["authors"] = self.authors
-        dataFrame["uploadtimestamp"] = self.upload_timestamp
+        dataFrame["uploadtimestamp"] = self.uploadtimestamp
         dataFrame["imageURL"] = self.imageURL
         dataFrame["imageDescription"] = self.imageDescription
         dataFrame["scrapingTimestamp"] = self.scrapingTimestamp

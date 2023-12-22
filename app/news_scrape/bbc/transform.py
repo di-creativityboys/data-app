@@ -1,4 +1,2 @@
-
-def transform(articles):
+def transform(articles: dict) -> dict:
     return articles
-

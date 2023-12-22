@@ -1,8 +1,8 @@
 import psycopg2
 import os
 
-DATABASE_PORT = os.environ.get("DATABASE_PORT", "5432")
-DATABASE_HOST = os.environ.get("DATABASE_HOST", "localhost")
+DATABASE_PORT: str = os.environ.get("DATABASE_PORT", "5432")
+DATABASE_HOST: str = os.environ.get("DATABASE_HOST", "localhost")
 
 
 class Database:
@@ -20,13 +20,13 @@ class Database:
 
         self.cursor = self.connection.cursor()
 
-    def execute(self, sqlStatement: str, valuesTuple: tuple):
-        self.cursor.execute(sqlStatement, valuesTuple)
+    def execute(self, sqlStatement: str, valuesTuple: tuple) -> None:
+        self.cursor.execute(query=sqlStatement, vars=valuesTuple)
 
-    def close_connection(self):
+    def close_connection(self) -> None:
         self.connection.close()
 
-    def initialize_schema(self):
-        schema = open("./database.sql", "r").read()
+    def initialize_schema(self) -> None:
+        schema: str = open(file="./database.sql", mode="r").read()
 
-        self.execute(schema, ())
+        self.execute(sqlStatement=schema, valuesTuple=())
