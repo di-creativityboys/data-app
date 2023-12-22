@@ -49,9 +49,10 @@ CREATE TABLE IF NOT EXISTS Tweets (
     clusterTopic text
 );
 
+
 CREATE TABLE IF NOT EXISTS TweetsNew (
     rawContent text PRIMARY KEY,
-    publishDatetime text,--should be timestamp later!!!
+    publishDatetime timestamp,--should be timestamp later!!!
     tweetUser varchar,
     replyCount int,
     retweetCount int,

@@ -42,13 +42,19 @@ def extract(steps,user):#steps=how far do we want to scroll
    #gets the text from the tweets of the current scroll page
    def get_tweetDate(elements):
       tweets_dates=[]
-   # get tweet date
+      # the format of the input date
+      date_format = "%b %d, %Y"
+      # the format of the output date date
+      date_format_output= "%Y-%m-%d"
+      # get tweet date
       for element in elements:
          try:
             div_element = element.find_element(By.TAG_NAME, 'time')
-            tweets_dates.append(div_element.text)
+            date_objekt = datetime.strptime(div_element.text, date_format)
+            timestamp_date = date_objekt.strftime(date_format_output)
+            tweets_dates.append(timestamp_date)
          except:
-            tweets_dates.append(None)
+               tweets_dates.append(None)
       return tweets_dates
 
 
