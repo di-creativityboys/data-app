@@ -8,7 +8,7 @@ def load(transformed_tweets):
 
     for tweet in transformed_tweets.values():
         try:
-            statement = """INSERT INTO TweetsNew(rawContent, publishDatetime, tweetUser, replyCount, retweetCount, likeCount, profilImage,scrapingTimeStamp) 
+            statement = """INSERT INTO Tweets(rawContent, publishDatetime, tweetUser, replyCount, retweetCount, likeCount, profileImageUrl,scrapingTimeStamp) 
                         VALUES (%s, %s, %s, %s, %s, %s, %s,%s);"""
             values = (
                 tweet["content"],

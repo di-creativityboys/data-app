@@ -1,6 +1,7 @@
 -- Create table for scraped news articles
 CREATE TABLE IF NOT EXISTS Articles (
-    urlId text PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
+    urlId text,
     headline text,
     content text,
     authors text[],
@@ -16,7 +17,7 @@ CREATE TABLE IF NOT EXISTS Articles (
 
 -- Create Table for scraped Tweets
 CREATE TABLE IF NOT EXISTS Tweets (
-    id bigint PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     tweetUrl varchar,
     publishDatetime timestamp,
     tweetUser varchar,
@@ -45,19 +46,7 @@ CREATE TABLE IF NOT EXISTS Tweets (
     videoLinks varchar [],
     animatedLinks varchar [],
     scrapingTimeStamp timestamp NOT NULL,
+    profileImageUrl varchar,
     clusterId int,
     clusterTopic text
 );
-
-
-CREATE TABLE IF NOT EXISTS TweetsNew (
-    rawContent text PRIMARY KEY,
-    publishDatetime timestamp,--should be timestamp later!!!
-    tweetUser varchar,
-    replyCount int,
-    retweetCount int,
-    likeCount int,
-    profilImage text,
-    scrapingTimeStamp timestamp NOT NULL
-);
-
