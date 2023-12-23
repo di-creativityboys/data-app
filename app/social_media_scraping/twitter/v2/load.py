@@ -3,6 +3,9 @@ from database.database import Database
 
 
 def load(transformed_tweets):
+    database = Database()
+    database.open_connection()
+
     for tweet in transformed_tweets.values():
         try:
             statement = """INSERT INTO TweetsNew(rawContent, publishDatetime, tweetUser, replyCount, retweetCount, likeCount, profilImage,scrapingTimeStamp) 
@@ -17,9 +20,10 @@ def load(transformed_tweets):
                 tweet["image"],
                 tweet["scrapingTimeStamp"],
             )
-            database = Database()
-            database.open_connection()
-            database.execute(statement, values)
+
+            database.execute(sqlStatement=statement, valuesTuple=values)
         except psycopg2.IntegrityError as e:
             if "duplicate key value violates unique constraint" in str(e):
                 print("Tweet already exists in the database.")
+
+    database.close_connection()

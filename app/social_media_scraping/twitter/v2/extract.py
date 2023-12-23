@@ -10,13 +10,13 @@ import pytz
 
 def extract(steps, user):  # steps=how far do we want to scroll
     options = Options()
-    options.add_argument("--headless")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument(argument="--headless")
+    options.add_argument(argument="--no-sandbox")
+    options.add_argument(argument="--disable-dev-shm-usage")
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
-    url = f"https://twitter.com/{user}"
-    driver.get(url)
+    url: str = f"https://twitter.com/{user}"
+    driver.get(url=url)
     time.sleep(5)
     print(driver.title)
 
@@ -160,6 +160,3 @@ def extract(steps, user):  # steps=how far do we want to scroll
     print(len(filtered_tweets))
 
     return filtered_tweets
-
-
-# extract(2,'BarackObama')

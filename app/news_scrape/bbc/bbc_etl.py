@@ -3,7 +3,7 @@ from news_scrape.bbc.transform import transform
 from news_scrape.bbc.load import load
 
 
-def bbc_etl() -> None:
+async def bbc_etl() -> None:
     print("[BBC] Extracting...")
     extracted_articles: dict = extract()
     print("[BBC] Transforming...")

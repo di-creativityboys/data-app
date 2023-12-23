@@ -5,7 +5,7 @@ from news_scrape.cnn.transform import transform
 from news_scrape.cnn.load import load
 
 
-def cnn_etl():
+async def cnn_etl():
     print("[CNN] Extracting...")
     extracted_articles = extract()
     print("[CNN] Transforming...")

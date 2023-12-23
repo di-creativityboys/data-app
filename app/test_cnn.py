@@ -1,3 +1,6 @@
+import sys
+sys.path.insert(0, "/workspaces/data-app/app/")
+
 import asyncio
 
 from database.database import Database
@@ -15,7 +18,7 @@ def manual_db_init():
 async def main():
     manual_db_init()
 
-    cnn_etl()
+    await cnn_etl()
 
 
 if __name__ == "__main__":

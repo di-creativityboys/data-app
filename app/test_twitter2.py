@@ -1,7 +1,9 @@
+import sys
+sys.path.insert(0, "/workspaces/data-app/app/")
+
 import asyncio
 
-# from social_media_scraping.twitter.load_tweets_db import scrape_twitter
-from social_media_scraping.twitter.new_twitter_scrape.twitter_etl import twitter_etl
+from social_media_scraping.twitter.v2.twitter_etl import twitter_etl
 
 
 async def main():

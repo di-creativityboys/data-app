@@ -7,58 +7,61 @@ else:
     sys.path.insert(0, "/workspaces/data-app/app/")
 
 import json
-import psycopg2
-
 from flask import Flask
 
 app = Flask(__name__)
 
-from news_scrape.bbc import bbc
-from news_scrape.cnn import scraper as cnn
+from database.database import Database
+from news_scrape.bbc import bbc_etl as bbc
+from news_scrape.cnn import cnn_etl as cnn
 from social_media_scraping.twitter import load_tweets_db as twitter
 
 
 @app.route("/")
 async def index():
-    return json.dumps({"name": "alice", "email": "alice@outlook.com"})
+    return json.dumps({"status": "data-app is running"})
 
 
 @app.route("/init/")
 async def myinit():
-    DB_PORT: str = os.environ.get("DATABASE_PORT", "5432")
-    DB_HOST: str = os.environ.get("DATABASE_HOST", "localhost")
+    database = Database()
+    database.open_connection()
+    database.initialize_schema()
+    database.close_connection()
 
-    conn = psycopg2.connect(dbname="postgres", user="postgres", password="postgres", port=DB_PORT, host=DB_HOST)
-    conn.autocommit = True
-    cursor = conn.cursor()
-
-    cursor.execute(query=open(file="./database.sql", mode="r").read())
-
-    conn.close()
-
-    return json.dumps({"status": "ok"})
+    return json.dumps({"status": "database initialized"})
 
 
 @app.route("/bbc/")
 async def bbc_handler():
-    await bbc.get_bbc_news()
+    # Fire and forget
+    await bbc.bbc_etl()
 
-    return json.dumps({"status": "started bbc scraping"})
+    return json.dumps({"status": "finished bbc scraping"})
 
 
 @app.route("/cnn/")
 async def cnn_handler():
-    await cnn.cnn_scraper()
+    # Fire and forget
+    await cnn.cnn_etl()
 
-    return json.dumps({"status": "started cnn scraping"})
+    return json.dumps({"status": "finished cnn scraping"})
 
 
 @app.route("/twitter/<name>")
-async def scrape_twitter_api(name):
-    print(f"Twitter scraping: {name}")
-    await twitter.scrape_twitter(name, 100)
+async def twitter_handler(name):
+    # Fire and forget
+    await twitter.scrape_twitter(user_name=name, limit=100)
 
-    return json.dumps({"status": "started twitter scraping"})
+    return json.dumps({"status": "finished twitter scraping"})
+
+
+@app.route("/twitter/v2/<name>")
+async def twitter_handler_v2(name):
+    # Fire and forget
+    await twitter.scrape_twitter(user_name=name, limit=100)
+
+    return json.dumps({"status": "finished twitter scraping"})
 
 
 if __name__ == "__main__":
