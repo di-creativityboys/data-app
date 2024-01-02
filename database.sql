@@ -50,3 +50,11 @@ CREATE TABLE IF NOT EXISTS Tweets (
     clusterId int,
     clusterTopic text
 );
+
+CREATE TABLE IF NOT EXISTS PromptTemplate (
+    id SERIAL PRIMARY KEY,
+    name varchar,
+    text0 varchar,
+    text1 varchar,
+    text2 varchar
+)
