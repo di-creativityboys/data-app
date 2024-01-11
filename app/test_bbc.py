@@ -12,7 +12,13 @@ def manual_db_init():
     database.open_connection()
     database.initialize_schema()
     database.close_connection()
-    print("DB initialized")
+    print("DB initialized")CREATE TABLE IF NOT EXISTS PromptTemplate (
+        id SERIAL PRIMARY KEY,
+        name varchar,
+        text0 varchar,
+        text1 varchar,
+        text2 varchar
+    )
 
 
 async def main():

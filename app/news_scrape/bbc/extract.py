@@ -1,9 +1,10 @@
 from selenium.webdriver import Chrome, ChromeOptions, ChromeService
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
-from urllib.parse import urlparse
 from datetime import datetime
 import pytz
+import spacy
+
 
 
 def extract() -> dict:
@@ -45,7 +46,6 @@ def extract() -> dict:
         get_timestamps(time, driver)
         get_headers(headers, driver)
         get_image(imageURL, imageDesc, driver)
-        get_topic(news_urls[i], topic)
 
     # in this section, we extract the authors from the contents
     all_authors = []
@@ -55,6 +55,16 @@ def extract() -> dict:
             all_authors.append(None)
         else:
             all_authors.extend(authors)
+
+    #here we extract the keywords from the contents
+    for article in text_contents:
+        nlp = spacy.load("en_core_web_sm")
+        doc = nlp(article)
+        if doc.ents:
+         for ent in doc.ents:
+            topic.append(ent.text)
+        else:
+            topic.append(None)
 
     germany_timezone = pytz.timezone("Europe/Berlin")
 
@@ -81,53 +91,52 @@ def extract() -> dict:
 # function, that preprocesses the urls, so that the topic can be extracted later
 
 
-def url_preprocessing(category):
-    # Find the position of the first digit in the category
-    digit_index = next((index for index, char in enumerate(category) if char.isdigit()), None)
+# def url_preprocessing(category):
+#     # Find the position of the first digit in the category
+#     digit_index = next((index for index, char in enumerate(category) if char.isdigit()), None)
 
-    # Remove everything after the first digit
-    category_without_number = category[:digit_index] if digit_index is not None else category
+#     # Remove everything after the first digit
+#     category_without_number = category[:digit_index] if digit_index is not None else category
 
-    # Remove trailing hyphen
-    if category_without_number.endswith("-"):
-        category_without_number = category_without_number[:-1]
+#     # Remove trailing hyphen
+#     if category_without_number.endswith("-"):
+#         category_without_number = category_without_number[:-1]
 
-    index_of_hyphen = category_without_number.rfind("-")  # search starting from the right
-    if index_of_hyphen != -1:  # if there was a hyphen
-        # cut everything to the left
-        result_string = category_without_number[index_of_hyphen + 1 :]
-        return result_string
-    else:
-        return category_without_number
-
-
-def get_topic(url, topic):
-    try:
-        parsed_url = urlparse(url)
-        path_segments = parsed_url.path.split("/")
-
-        # Find the segment after "news"
-        category_segment_index = path_segments.index("news") + 1
-        category = path_segments[category_segment_index]
-
-        category_without_number = url_preprocessing(category)
-
-        topic.append(category_without_number)
-    except:
-        try:
-            parsed_url = urlparse(url)
-            path_segments = parsed_url.path.split("/")
-            category_segment_index = path_segments.index("sport") + 1
-            category = path_segments[category_segment_index]
-
-            category_without_number = url_preprocessing(category)
-
-            topic.append(category_without_number)
-
-        except:
-            topic.append(None)
+#     index_of_hyphen = category_without_number.rfind("-")  # search starting from the right
+#     if index_of_hyphen != -1:  # if there was a hyphen
+#         # cut everything to the left
+#         result_string = category_without_number[index_of_hyphen + 1 :]
+#         return result_string
+#     else:
+#         return category_without_number
 
 
+# def get_topic(url, topic):
+#     try:
+#         parsed_url = urlparse(url)
+#         path_segments = parsed_url.path.split("/")
+
+#         # Find the segment after "news"
+#         category_segment_index = path_segments.index("news") + 1
+#         category = path_segments[category_segment_index]
+
+#         category_without_number = url_preprocessing(category)
+
+#         topic.append(category_without_number)
+#     except:
+#         try:
+#             parsed_url = urlparse(url)
+#             path_segments = parsed_url.path.split("/")
+#             category_segment_index = path_segments.index("sport") + 1
+#             category = path_segments[category_segment_index]
+
+#             category_without_number = url_preprocessing(category)
+
+#             topic.append(category_without_number)
+
+#         except:
+#             topic.append(None)
+   
 def get_contents(text_contents, driver):
     try:
         article = driver.find_element(By.TAG_NAME, "article")
@@ -177,10 +186,21 @@ def get_image(imageURL, ImageDesc, driver):
         imageURL.append(url)
         ImageDesc.append(desc)
     except:
-        url = None
-        desc = None
-        imageURL.append(url)
-        ImageDesc.append(desc)
+        try:
+            #doesnt work yet
+            main_content = driver.find_element(By.CSS_SELECTOR, "hero-image")
+            image_element = main_content.find_element(By.TAG_NAME, "img")
+            url = image_element.get_attribute("src")
+            desc = image_element.get_attribute("alt")
+            imageURL.append(url)
+            ImageDesc.append(desc)
+        except:
+            url = None
+            desc = None
+            imageURL.append(url)
+            ImageDesc.append(desc)
+
+            
 
 
 def get_authors(article):
