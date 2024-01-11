@@ -1,17 +1,5 @@
-# Clustering of articles from database (as they origin from different sources e.g. CNN, BBC)
 
-# 1 Preprocess content
-# 2 Cluster based on content
-# 3 Per cluster: majority vote on topic as a clusterTopic
-
-# goal: only show one news article per cluster in frontend (on demand show more)
-
-
-# ------------- IMPORT --------------------
-
-# ensure path for database module works
-import sys
-sys.path.insert(0,'/workspaces/data-app/app/database')
+# ------------ IMPORTS --------------------
 
 # basic imports
 import psycopg2
@@ -32,8 +20,8 @@ from collections import Counter
 import time
 
 # download nltk packages if needed
-# nltk.download('stopwords')
-# nltk.download('wordnet')
+nltk.download('stopwords')
+nltk.download('wordnet')
 
 # imports TFIDF
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -44,23 +32,6 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.decomposition import TruncatedSVD
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
-
-
-
-# -------------- EXTRACT -----------------
-
-def extract_articles():
-    # open database connection
-    database = Database()
-    database.open_connection()
-
-    # get articles table into datframe
-    sql = "SELECT * FROM articles;"
-    articles = sqlio.read_sql_query(sql, database.connection)
-    database.close_connection()
-
-    return articles
-
 
 
 # ------------- TRANSFORM ---------------
@@ -111,37 +82,3 @@ def transform_and_cluster_articles(articles):
         articles['clusterTopic'][index] = currentdf.topic.mode()[0]
     
     return articles
-
-
-
-# -------------- LOAD ----------------
-
-def load_clusters_into_db(articles):
-    # new database connection
-    database = Database()
-    database.open_connection()
-
-    # write clusterIds and clusterTopics into database
-    for index, row in articles.iterrows():
-        try:
-            database.execute('''UPDATE articles
-                                SET clusterId = %s, clusterTopic = %s
-                                WHERE urlid = %s''',
-                                (row.clusterId,
-                                 row.clusterTopic,
-                                 row.urlid
-                                )
-                            )
-        except BaseException as ex:
-            print('Error: ', ex)
-    database.close_connection()
-   
-
-
-# ------------- MAIN -------------------- 
-
-async def cluster_articles_in_db():
-
-    articles = extract_articles()
-    clustered_articles = transform_and_cluster_articles(articles)
-    load_clusters_into_db(clustered_articles)
