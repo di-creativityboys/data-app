@@ -179,7 +179,7 @@ def get_timestamps(time, driver):
 
 def get_image(imageURL, ImageDesc, driver):
     try:
-        main_content=driver.find_element(By.ID, "main-content")
+        main_content = driver.find_element(By.ID, "main-content")
         image_element = main_content.find_element(By.TAG_NAME, "img")
         url = image_element.get_attribute("src")
         desc = image_element.get_attribute("alt")
@@ -208,6 +208,6 @@ def get_authors(article):
     lines = article.split("\n")
     for line in lines[:13]:  # Loop through lines from lines[0] to lines[10]
         if "By" in line:
-            input=line.replace("By", "")
+            input = line.replace("By", "")
             authors.append(input)
     return authors
