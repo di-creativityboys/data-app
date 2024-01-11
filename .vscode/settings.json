@@ -30,7 +30,7 @@
     "python.analysis.inlayHints.callArgumentNames": "all",
     "python.analysis.inlayHints.variableTypes": true,
     "python.terminal.activateEnvInCurrentTerminal": true,
-    //"python.analysis.diagnosticMode": "workspace",
+    "python.analysis.diagnosticMode": "workspace",
     "editor.wordWrapColumn": 140,
     "editor.wordWrap": "wordWrapColumn",
     
