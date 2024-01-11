@@ -1,3 +1,4 @@
+from typing_extensions import SupportsIndex
 from bs4 import BeautifulSoup, Tag
 import pandas as pd
 import requests
@@ -123,8 +124,8 @@ def get_read_time(article_soup: BeautifulSoup):
 def get_image_tuple(article_soup: BeautifulSoup) -> tuple:
     image_tag = article_soup.find(is_image)
     if image_tag is not None:
-        # modify this
-        return (image_tag["src"], image_tag["alt"])
+         # Try to access "src" and "alt" attributes
+            return (image_tag["src"], image_tag["alt"])
     else:
         return ("", "")
 

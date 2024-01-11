@@ -52,7 +52,7 @@ def extract() -> dict:
     for article in text_contents:
         authors = get_authors(article)
         if not authors:  # Check if authors is an empty list
-            all_authors.append("no author")
+            all_authors.append(None)
         else:
             all_authors.extend(authors)
 
@@ -125,7 +125,7 @@ def get_topic(url, topic):
             topic.append(category_without_number)
 
         except:
-            topic.append("no info")
+            topic.append(None)
 
 
 def get_contents(text_contents, driver):
@@ -153,7 +153,7 @@ def get_headers(headers, driver):
                 header = driver.find_element(By.CLASS_NAME, "article-headline__text")
                 headers.append(header.text)
             except:
-                header = "unknown"
+                header = None
                 headers.append(header)
 
 
@@ -170,7 +170,8 @@ def get_timestamps(time, driver):
 
 def get_image(imageURL, ImageDesc, driver):
     try:
-        image_element = driver.find_element(By.TAG_NAME, "img")
+        main_content=driver.find_element(By.ID, "main-content")
+        image_element = main_content.find_element(By.TAG_NAME, "img")
         url = image_element.get_attribute("src")
         desc = image_element.get_attribute("alt")
         imageURL.append(url)
@@ -187,5 +188,6 @@ def get_authors(article):
     lines = article.split("\n")
     for line in lines[:13]:  # Loop through lines from lines[0] to lines[10]
         if "By" in line:
-            authors.append(line.replace("By", ""))
+            input=line.replace("By", "")
+            authors.append(input)
     return authors
