@@ -30,13 +30,14 @@ def extract() -> dict:
 
         news_urls.append(url_to_article)
 
-    # main method to extract all contents except the authors(might follow later). Runs way faster than the different smaller methods before
+    # main method to extract all contents. Runs way faster than the different smaller methods before
     text_contents = []
     time = []
     headers = []
     imageURL = []
     imageDesc = []
     topic = []
+    all_authors=[]
 
     # loop through all urls of the articles
     for i in range(len(news_urls)):
@@ -46,25 +47,10 @@ def extract() -> dict:
         get_timestamps(time, driver)
         get_headers(headers, driver)
         get_image(imageURL, imageDesc, driver)
+    
+    get_all_authors(text_contents,all_authors)
+    get_topics(text_contents,topic)
 
-    # in this section, we extract the authors from the contents
-    all_authors = []
-    for article in text_contents:
-        authors = get_authors(article)
-        if not authors:  # Check if authors is an empty list
-            all_authors.append(None)
-        else:
-            all_authors.extend(authors)
-
-    #here we extract the keywords from the contents
-    for article in text_contents:
-        nlp = spacy.load("en_core_web_sm")
-        doc = nlp(article)
-        if doc.ents:
-         for ent in doc.ents:
-            topic.append(ent.text)
-        else:
-            topic.append(None)
 
     germany_timezone = pytz.timezone("Europe/Berlin")
 
@@ -188,7 +174,7 @@ def get_image(imageURL, ImageDesc, driver):
     except:
         try:
             #doesnt work yet
-            main_content = driver.find_element(By.CSS_SELECTOR, "hero-image")
+            main_content = driver.find_element(By.TAG_NAME, "picture")
             image_element = main_content.find_element(By.TAG_NAME, "img")
             url = image_element.get_attribute("src")
             desc = image_element.get_attribute("alt")
@@ -211,3 +197,23 @@ def get_authors(article):
             input = line.replace("By", "")
             authors.append(input)
     return authors
+
+# in this section, we extract the authors from the contents
+def get_all_authors(contents,all_authors):
+    for article in contents:
+        authors = get_authors(article)
+        if not authors:  # Check if authors is an empty list
+            all_authors.append(None)
+        else:
+            all_authors.extend(authors)
+
+#here we extract the keywords from the contents
+def get_topics(contents,topic):
+    for article in contents:
+        nlp = spacy.load("en_core_web_sm")
+        doc = nlp(article)
+        if doc.ents:
+         for ent in doc.ents:
+            topic.append(ent.text)
+        else:
+            topic.append(None)

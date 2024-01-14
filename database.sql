@@ -1,4 +1,5 @@
 -- Create table for scraped news articles
+--drop table Articles;
 CREATE TABLE IF NOT EXISTS Articles (
     id SERIAL PRIMARY KEY,
     urlId text,
