@@ -191,8 +191,8 @@ def get_authors(article):
     lines = article.split("\n")
     for line in lines[:13]:  # Loop through lines from lines[0] to lines[10]
         if "By" in line:
-            input = line.replace("By", "")
-            authors.append(input)
+            my_input = line.replace("By", "")
+            authors.append(my_input)
     return authors
 
 
@@ -201,7 +201,9 @@ def get_all_authors(contents, all_authors):
     for article in contents:
         authors = get_authors(article)
         if not authors:  # Check if authors is an empty list
-            all_authors.append(None)
+            # Do not append None! I assume, that this is a String array later
+            all_authors.append("")
+            print("No authors found")
         else:
             all_authors.extend(authors)
 
