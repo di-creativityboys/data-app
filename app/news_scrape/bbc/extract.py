@@ -6,7 +6,6 @@ import pytz
 import spacy
 
 
-
 def extract() -> dict:
     # Setup Selenium
     options = ChromeOptions()
@@ -37,7 +36,7 @@ def extract() -> dict:
     imageURL = []
     imageDesc = []
     topic = []
-    all_authors=[]
+    all_authors = []
 
     # loop through all urls of the articles
     for i in range(len(news_urls)):
@@ -47,10 +46,9 @@ def extract() -> dict:
         get_timestamps(time, driver)
         get_headers(headers, driver)
         get_image(imageURL, imageDesc, driver)
-    
-    get_all_authors(text_contents,all_authors)
-    get_topics(text_contents,topic)
 
+    get_all_authors(text_contents, all_authors)
+    get_topics(text_contents, topic)
 
     germany_timezone = pytz.timezone("Europe/Berlin")
 
@@ -122,7 +120,8 @@ def extract() -> dict:
 
 #         except:
 #             topic.append(None)
-   
+
+
 def get_contents(text_contents, driver):
     try:
         article = driver.find_element(By.TAG_NAME, "article")
@@ -173,7 +172,7 @@ def get_image(imageURL, ImageDesc, driver):
         ImageDesc.append(desc)
     except:
         try:
-            #doesnt work yet
+            # doesnt work yet
             main_content = driver.find_element(By.TAG_NAME, "picture")
             image_element = main_content.find_element(By.TAG_NAME, "img")
             url = image_element.get_attribute("src")
@@ -186,8 +185,6 @@ def get_image(imageURL, ImageDesc, driver):
             imageURL.append(url)
             ImageDesc.append(desc)
 
-            
-
 
 def get_authors(article):
     authors = []
@@ -198,8 +195,9 @@ def get_authors(article):
             authors.append(input)
     return authors
 
+
 # in this section, we extract the authors from the contents
-def get_all_authors(contents,all_authors):
+def get_all_authors(contents, all_authors):
     for article in contents:
         authors = get_authors(article)
         if not authors:  # Check if authors is an empty list
@@ -207,13 +205,15 @@ def get_all_authors(contents,all_authors):
         else:
             all_authors.extend(authors)
 
-#here we extract the keywords from the contents
-def get_topics(contents,topic):
+
+# here we extract the keywords from the contents
+def get_topics(contents, topic):
     for article in contents:
+        # IMPORTANT: ASK BEFORE CHANGING THE MODEL!!!!!!!!!!!!!!!!!!
         nlp = spacy.load("en_core_web_sm")
         doc = nlp(article)
         if doc.ents:
-         for ent in doc.ents:
-            topic.append(ent.text)
+            for ent in doc.ents:
+                topic.append(ent.text)
         else:
             topic.append(None)
