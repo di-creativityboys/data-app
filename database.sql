@@ -2,7 +2,7 @@
 --drop table Articles;
 CREATE TABLE IF NOT EXISTS Articles (
     id SERIAL PRIMARY KEY,
-    urlId text,
+    urlId text UNIQUE,
     headline text,
     content text,
     authors text[],
