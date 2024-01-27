@@ -3,10 +3,13 @@ FROM python:3.11-bullseye
 WORKDIR /app
 
 ENV PYTHONUNBUFFERED 1
+ENV MY_PRODUCTION="production"
 
 COPY requirements.txt /tmp/pip-tmp/
 RUN pip3 --disable-pip-version-check --no-cache-dir install -r /tmp/pip-tmp/requirements.txt \
     && rm -rf /tmp/pip-tmp
+
+RUN python3 -m spacy download en_core_web_sm
 
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive 
 

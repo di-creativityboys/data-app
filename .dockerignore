@@ -1,0 +1,6 @@
+venv/
+notebooks/
+.vscode/
+.devcontainer/
+.gitignore
+README.md

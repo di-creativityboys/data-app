@@ -1,54 +1,60 @@
-/*markdown
- # Database setup for DevContainer
- */
-
+-- Create table for scraped news articles
+--drop table Articles;
 CREATE TABLE IF NOT EXISTS Articles (
-    URLId text Constraint primary_key Primary Key,
-    Headline text,
-    Contents text,
-    Authors text,
-    UploadDate text,
-    ReadTime text,
-    ImageURL text,
-    ImageDescription text,
-    ScrapingTimeStamp text
+    urlId text PRIMARY KEY,
+    headline text,
+    content text,
+    authors text[],
+    uploadTimestamp timestamp, -- should be called instead
+    imageURL text,
+    imageDescription text,
+    scrapingTimestamp timestamp NOT NULL,
+    source text,
+    topic text,
+    clusterId int,
+    clusterTopic text
 );
-
--- Create Schema for tables of social media sources (Twitter, Instagram, etc.)
-CREATE SCHEMA IF NOT EXISTS social_media;
 
 -- Create Table for scraped Tweets
-CREATE TABLE IF NOT EXISTS social_media.Tweets (
-    id bigint NOT NULL UNIQUE Constraint primary_key Primary Key,
-    id_str text,
-    tweet_url text,
-    publish_date timestamp,
-    tweet_user text,
-    lang text,
+CREATE TABLE IF NOT EXISTS Tweets (
+    id SERIAL PRIMARY KEY,
+    tweetUrl varchar,
+    publishDatetime timestamp,
+    tweetUser varchar,
+    languageCode varchar,
     rawContent text,
-    replyCount numeric,
-    retweetCount numeric,
-    likeCount numeric,
-    quoteCount numeric,
-    conversationId text,
-    hashtags text, -- list of hastags (interesting?)
-    cashtags text,
-    mentionedUsers text, -- list of users (interesting?)
-    links text,
-    viewCount numeric,
-    retweetedTweet text,
-    quotedTweet text,  -- ToDo: select id only??? tweet is probably not in our db anyways
-    place text,
-    coordinates text,
-    inReplyToTweetId text,
-    inReplyToUser text,
-    source text,
-    sourceUrl text,
-    sourceLabel text,
-    media text,
-    _type text
+    replyCount int,
+    retweetCount int,
+    likeCount int,
+    quoteCount int,
+    hashtags varchar [],
+    -- list of hastags (interesting?)
+    cashtags varchar [],
+    -- hashtag with $
+    mentionedUsers varchar [],
+    -- list of users (interesting?)
+    linksInTweet varchar [],
+    viewCount int,
+    retweetedTweetId text,
+    quotedTweetId text,
+    -- ToDo: select id only??? tweet is probably not in our db anyways
+    -- place varchar,
+    -- coordinates varchar,
+    -- inReplyToTweetId varchar,
+    inReplyToUser varchar,
+    photoLinks varchar [],
+    videoLinks varchar [],
+    animatedLinks varchar [],
+    scrapingTimeStamp timestamp NOT NULL,
+    profileImageUrl varchar,
+    clusterId int,
+    clusterTopic text
 );
 
--- Index on id for fast inserting or searching
-CREATE UNIQUE INDEX IF NOT EXISTS idx_tweet_id
-ON social_media.Tweets (id);
+CREATE TABLE IF NOT EXISTS PromptTemplate (
+    id SERIAL PRIMARY KEY,
+    name varchar,
+    text0 varchar,
+    text1 varchar,
+    text2 varchar
+)
