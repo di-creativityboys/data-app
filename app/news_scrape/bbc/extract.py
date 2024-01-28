@@ -176,25 +176,6 @@ def get_image(imageURL, ImageDesc, driver):
             ImageDesc.append(desc)
 
 
-# def get_authors(article):
-#     authors = []
-#     lines = article.split("\n")
-#     for line in lines[:13]:  # Loop through lines from lines[0] to lines[10]
-#         if "By" in line:
-#             input = line.replace("By", "")
-#             authors.append(input)
-#     return authors
-
-# # in this section, we extract the authors from the contents
-# def get_all_authors(contents,all_authors):
-#     for article in contents:
-#         authors = get_authors(article)
-#         if not authors:  # Check if authors is an empty list
-#             all_authors.append(None)
-#         else:
-#             all_authors.extend(authors)
-
-
 # here we extract the keywords from the contents
 def get_topics(contents, topic):
     for article in contents:
