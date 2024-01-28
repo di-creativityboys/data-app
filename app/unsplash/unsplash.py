@@ -3,7 +3,7 @@ import requests
 def get_unsplash(amount_of_images, search_query):  # search query must be a string of the preferred topic, i.e "Gaza" , "Sports"
     url = "https://api.unsplash.com/photos/random"
 
-    # My personal API-Key
+    # My personal API-Key TODO: Remove this and add it to the .env file
     api_key = "yxTqVe8SO0J4Bc8ThfY9wwnZolR3qCNzSU42bzbRCWs"
     parameter = {"client_id": api_key, "count": amount_of_images, "query": search_query}
 

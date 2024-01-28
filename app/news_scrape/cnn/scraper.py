@@ -18,18 +18,22 @@ From the articles, get everything you can get your hands on.
 Turn the article to dictionary form
 """
 
-from bs4 import BeautifulSoup, Tag, NavigableString
+from bs4 import BeautifulSoup, Tag
 import requests
 from typing import List
 from datetime import datetime
 import pandas as pd
 import pandas as pd
 from sqlalchemy import create_engine
-from getpass import getpass
 
 MAINPAGE = "edition.cnn.com"
 HTTPS_SUFFIX = "https://"
 MAINPAGE_LINK = f"{HTTPS_SUFFIX}{MAINPAGE}"
+
+import os
+
+DATABASE_PORT: str = os.environ.get("DATABASE_PORT", "5432")
+DATABASE_HOST: str = os.environ.get("DATABASE_HOST", "localhost")
 
 
 # added using Google Colab - R.H 04.12
@@ -222,7 +226,7 @@ def get_articles():
 
 # the database connection code is postgres
 def get_engine():
-    return create_engine(f"postgresql://postgres:postgres@localhost:5432/postgres")
+    return create_engine(f"postgresql://postgres:postgres@{DATABASE_HOST}:{DATABASE_PORT}/postgres")
 
 
 def filter_articles(articles: List[Article], engine) -> List[Article]:

@@ -15,6 +15,8 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive
 #    && dpkg -i google-chrome-stable_current_amd64.deb \
 #    && rm google-chrome-stable_current_amd64.deb
 
+RUN python3 -m spacy download en_core_web_sm
+
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \ 
     && echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list
 

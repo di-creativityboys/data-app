@@ -1,15 +1,18 @@
-from gettext import translation
 import pandas as pd
 from sqlalchemy import create_engine
 
 from news_scrape.cnn.article import Article
+import os
 
-engine = create_engine(f"postgresql://postgres:postgres@localhost:5432/postgres")
+DATABASE_PORT: str = os.environ.get("DATABASE_PORT", "5432")
+DATABASE_HOST: str = os.environ.get("DATABASE_HOST", "localhost")
+
+engine = create_engine(url=f"postgresql://postgres:postgres@{DATABASE_HOST}:{DATABASE_PORT}/postgres")
 
 
 def transform(articles: list[Article]) -> pd.DataFrame:
     # filtered against existing articles in database
-    new_articles = filter_articles(articles)
+    new_articles = filter_articles(articles=articles)
 
     # this dictionary only contains the articles that are not in the database already
     article_dicts = [article.__dict__ for article in new_articles]
@@ -28,7 +31,7 @@ def transform(articles: list[Article]) -> pd.DataFrame:
 
 def filter_articles(articles: list[Article]) -> list[Article]:
     new_articles = []
-    articles_already_present = pd.read_sql_table("articles", con=engine)
+    articles_already_present = pd.read_sql_table(table_name="articles", con=engine)
     #  print(articles_already_present.info()) # logging
     urls_of_old_articles = list(articles_already_present["urlid"])
     # print(urls_of_old_articles) # logging
@@ -37,7 +40,7 @@ def filter_articles(articles: list[Article]) -> list[Article]:
         if article.urlId[8:] not in urls_of_old_articles:
             new_articles.append(article)
         else:
-            count_of_old_articles = count_of_old_articles + 1
+            count_of_old_articles: int = count_of_old_articles + 1
     print(f"Count of old articles: {count_of_old_articles}")
 
     return new_articles

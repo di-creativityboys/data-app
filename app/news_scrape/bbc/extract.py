@@ -38,7 +38,7 @@ def extract() -> dict:
     imageURL = []
     imageDesc = []
     topic = []
-    all_authors=[]
+    all_authors = []
 
     # loop through all urls of the articles
     for i in range(len(news_urls)):
@@ -162,7 +162,7 @@ def get_image(imageURL, ImageDesc, driver):
         ImageDesc.append(desc)
     except:
         try:
-            #doesnt work yet
+            # doesnt work yet
             main_content = driver.find_element(By.TAG_NAME, "picture")
             image_element = main_content.find_element(By.TAG_NAME, "img")
             url = image_element.get_attribute("src")
@@ -174,8 +174,6 @@ def get_image(imageURL, ImageDesc, driver):
             desc = None
             imageURL.append(url)
             ImageDesc.append(desc)
-
-            
 
 
 # def get_authors(article):
@@ -196,13 +194,15 @@ def get_image(imageURL, ImageDesc, driver):
 #         else:
 #             all_authors.extend(authors)
 
-#here we extract the keywords from the contents
-def get_topics(contents,topic):
+
+# here we extract the keywords from the contents
+def get_topics(contents, topic):
     for article in contents:
+        # IMPORTANT: ASK BEFORE CHANGING THE MODEL!!!!!!!!!!!!!!!!!!
         nlp = spacy.load("en_core_web_sm")
         doc = nlp(article)
         if doc.ents:
-         for ent in doc.ents:
-            topic.append(ent.text)
+            for ent in doc.ents:
+                topic.append(ent.text)
         else:
             topic.append(None)

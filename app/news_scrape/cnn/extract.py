@@ -1,4 +1,3 @@
-from typing_extensions import SupportsIndex
 from bs4 import BeautifulSoup, Tag
 import pandas as pd
 import requests
