@@ -4,7 +4,7 @@ def transform(articles: dict) -> dict:
     for article in articles.values():
         content = article["contents"]
         lines = content.split("\n")
-        if not "Let us know you agree to cookies" in lines[:35]:
+        if "Let us know you agree to cookies" not in lines[:35] and content.strip() :
             article_info_i = {
                 "headline": article["headline"],
                 "url": article["url"],

@@ -4,6 +4,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from datetime import datetime
 import pytz
 import spacy
+import re
 
 
 
@@ -47,8 +48,7 @@ def extract() -> dict:
         get_timestamps(time, driver)
         get_headers(headers, driver)
         get_image(imageURL, imageDesc, driver)
-    
-    get_all_authors(text_contents,all_authors)
+        get_authors(all_authors,driver)
     get_topics(text_contents,topic)
 
 
@@ -74,65 +74,34 @@ def extract() -> dict:
     return articles_info
 
 
-# function, that preprocesses the urls, so that the topic can be extracted later
+def extract_text_before_first_number(text):
+    match = re.search(r'^(.*?)(\d)', text)
+    if match:
+        return match.group(1).strip()
+    else:
+        return text.strip()
 
 
-# def url_preprocessing(category):
-#     # Find the position of the first digit in the category
-#     digit_index = next((index for index, char in enumerate(category) if char.isdigit()), None)
-
-#     # Remove everything after the first digit
-#     category_without_number = category[:digit_index] if digit_index is not None else category
-
-#     # Remove trailing hyphen
-#     if category_without_number.endswith("-"):
-#         category_without_number = category_without_number[:-1]
-
-#     index_of_hyphen = category_without_number.rfind("-")  # search starting from the right
-#     if index_of_hyphen != -1:  # if there was a hyphen
-#         # cut everything to the left
-#         result_string = category_without_number[index_of_hyphen + 1 :]
-#         return result_string
-#     else:
-#         return category_without_number
-
-
-# def get_topic(url, topic):
-#     try:
-#         parsed_url = urlparse(url)
-#         path_segments = parsed_url.path.split("/")
-
-#         # Find the segment after "news"
-#         category_segment_index = path_segments.index("news") + 1
-#         category = path_segments[category_segment_index]
-
-#         category_without_number = url_preprocessing(category)
-
-#         topic.append(category_without_number)
-#     except:
-#         try:
-#             parsed_url = urlparse(url)
-#             path_segments = parsed_url.path.split("/")
-#             category_segment_index = path_segments.index("sport") + 1
-#             category = path_segments[category_segment_index]
-
-#             category_without_number = url_preprocessing(category)
-
-#             topic.append(category_without_number)
-
-#         except:
-#             topic.append(None)
-   
 def get_contents(text_contents, driver):
     try:
-        article = driver.find_element(By.TAG_NAME, "article")
-        text_contents.append(article.text)
-    except:  # exception if no article element is there. doesn´t happen often, but has to be handled
-        article = driver.find_element(By.TAG_NAME, "body")
-        text_contents.append(article.text)
+        article = driver.find_element(By.ID, "main-content")
+        text_blocks=article.find_elements(By.CSS_SELECTOR, '[data-component="text-block"]')
+        merged_text = '\n'.join([text_block.text for text_block in text_blocks])
+        text_contents.append(merged_text)
+    except:
+        try:
+            article=driver.find_element(By.CLASS_NAME, 'qa-story-body')
+            text_contents.append(article.text)
+        except:
+            try:
+                article=driver.find_element(By.CLASS_NAME, 'body-text-card')
+                text_contents.append(article.text)
+            except:
+                    # exception if no article element is there. doesn´t happen often, but has to be handled
+                    article = driver.find_element(By.TAG_NAME, "body")
+                    text_contents.append(article.text)
+                    print('body')
         # in this test, 3 of 73 articels had no article element.
-
-    # here are a few exceptions, because the bbc articles have different html structures
 
 
 def get_headers(headers, driver):
@@ -150,6 +119,26 @@ def get_headers(headers, driver):
             except:
                 header = None
                 headers.append(header)
+
+def get_authors(all_authors, driver):
+    try:
+        authors_text = driver.find_element(By.CSS_SELECTOR, '[data-component="byline-block"]').text
+        if "BBC" in authors_text:
+            authors_first_step=authors_text.split("BBC")[0].strip()#remove unnecessary text
+        elif "Culture" in authors_text:
+            authors_first_step=authors_text.split("Culture")[0].strip()#remove unnecessary text
+        else:
+            authors_first_step=authors_text.split("Business")[0].strip()#remove unnecessary text
+        authors=authors_first_step.split("By")[1].strip()
+        all_authors.append(authors)
+    except:
+        try:
+            authors_first = driver.find_element(By.CLASS_NAME, "author-unit")
+            authors = extract_text_before_first_number(authors_first)
+            all_authors.append(authors)
+        except:
+                authors = None
+                all_authors.append(authors)
 
 
 def get_timestamps(time, driver):
@@ -189,23 +178,23 @@ def get_image(imageURL, ImageDesc, driver):
             
 
 
-def get_authors(article):
-    authors = []
-    lines = article.split("\n")
-    for line in lines[:13]:  # Loop through lines from lines[0] to lines[10]
-        if "By" in line:
-            input = line.replace("By", "")
-            authors.append(input)
-    return authors
+# def get_authors(article):
+#     authors = []
+#     lines = article.split("\n")
+#     for line in lines[:13]:  # Loop through lines from lines[0] to lines[10]
+#         if "By" in line:
+#             input = line.replace("By", "")
+#             authors.append(input)
+#     return authors
 
-# in this section, we extract the authors from the contents
-def get_all_authors(contents,all_authors):
-    for article in contents:
-        authors = get_authors(article)
-        if not authors:  # Check if authors is an empty list
-            all_authors.append(None)
-        else:
-            all_authors.extend(authors)
+# # in this section, we extract the authors from the contents
+# def get_all_authors(contents,all_authors):
+#     for article in contents:
+#         authors = get_authors(article)
+#         if not authors:  # Check if authors is an empty list
+#             all_authors.append(None)
+#         else:
+#             all_authors.extend(authors)
 
 #here we extract the keywords from the contents
 def get_topics(contents,topic):
