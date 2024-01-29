@@ -138,7 +138,7 @@ def get_authors(all_authors, driver):
             all_authors.append(authors)
         except:
                 authors = None
-                all_authors.append(authors)
+                #all_authors.append(authors)
 
 
 def get_timestamps(time, driver):
