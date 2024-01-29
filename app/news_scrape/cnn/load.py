@@ -8,4 +8,4 @@ DATABASE_HOST: str = os.environ.get("DATABASE_HOST", "localhost")
 
 def load(articles: pd.DataFrame):
     engine = create_engine(f"postgresql://postgres:postgres@{DATABASE_HOST}:{DATABASE_PORT}/postgres")
-    articles.to_sql(name="articles", con=engine, if_exists="replace", index=False)
+    articles.to_sql(name="articles", con=engine, if_exists="append", index=False)
